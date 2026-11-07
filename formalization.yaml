@@ -22,7 +22,11 @@ project:
     Filippov's theorem: for a continuous control system with compact control set, convex velocity
     sets and bounded velocities, the attainable sets at time T and up to time T are compact; hence
     optimal controls exist for integral costs whose extended velocity sets are convex, with fixed
-    or free terminal time.
+    or free terminal time. Both results are also proved, by the same argument, for problems posed
+    on part of the space: trajectories confined to a closed set S (the dynamics and the cost need
+    only be continuous, the velocities bounded and the velocity sets convex on S x U), starting in
+    a compact set, with initial and terminal points in a closed relation, and terminal times in a
+    window [T0, T1].
 
 
     Everything the proofs use is proved: existence, uniqueness and differentiable dependence of
@@ -88,12 +92,16 @@ status:
     principle with free terminal time, an integral cost and mixed boundary conditions that the
     remarks after Theorems 12.3-12.5 leave to the reader, for strong local minimizers; Theorem 10.1
     (Filippov's theorem: the attainable sets at time T and up to time T are compact) and the
-    existence of optimal controls for integral costs with fixed and free terminal time; Proposition
-    11.3 and the variations formula (12.13), read pointwise along trajectories (D2); and the
-    Caratheodory theory that the source cites (D11). The Challenge states the maximum principle
+    existence of optimal controls for integral costs with fixed and free terminal time; an
+    extension of both, by the same argument, to a closed state constraint, a compact set of initial
+    points, a closed endpoint relation and a window of terminal times
+    (ControlSystem.isCompact_constrainedEndpoints, ControlSystem.exists_optimal_constrained);
+    Proposition 11.3 and the variations formula (12.13), read pointwise along trajectories (D2);
+    and the Caratheodory theory that the source cites (D11). The Challenge states the maximum principle
     (free time, cost, mixed boundary conditions), Filippov's theorem in both forms and the
-    existence of optimal controls in both forms; Theorems 12.1-12.5 are proved in the library
-    (Pontryagin.theorem12_1 to theorem12_5) but are not part of the Challenge. Not formalized: the
+    existence of optimal controls in both forms; Theorems 12.1-12.5 (Pontryagin.theorem12_1 to
+    theorem12_5) and the forms of Filippov's theorem and of the existence of optimal controls with
+    a state constraint are proved in the library but are not part of the Challenge. Not formalized: the
     setting of manifolds (the state space is an open subset of a finite-dimensional real normed
     space, D1), the chronological calculus as such (D2), and the other results and chapters of the
     book. Brouwer's fixed-point theorem comes from the FixedPoint package, a dependency of the
@@ -199,7 +207,9 @@ fidelity:
     the derivative, and Brouwer's theorem gives the openness). Filippov's theorem is proved by the
     standard argument: the trajectories are equi-Lipschitz, a cluster point exists by Tychonoff's
     theorem, its derivative lies in the convex velocity set almost everywhere, and a measurable
-    control realizing it is found by measurable selection.
+    control realizing it is found by measurable selection. The forms with a state constraint follow
+    the same proof: a limit of trajectories confined to the closed set S stays in S, so continuity
+    and convexity are needed only on S x U.
 
 review:
   status: "agent-reviewed"
