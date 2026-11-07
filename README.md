@@ -282,12 +282,13 @@ theorem exists_optimal_fixedTime (hF : Continuous fun p : E × V ↦ F p.1 p.2)
         ∫ t in (0 : ℝ)..T, φ (x t) (u t) ≤ ∫ t in (0 : ℝ)..T, φ (x' t) (u' t)
 ```
 
-[`OptimalControl/ODE/StateConstraint.lean`](OptimalControl/ODE/StateConstraint.lean) states the
+[`OptimalControl/ODE/StateConstraint.lean`](OptimalControl/ODE/StateConstraint.lean) proves the
 same two results for problems posed on part of the space: a closed state constraint `S` (with `F`
 and `φ` continuous, the velocities bounded and the velocity sets convex only on `S × U`), a compact
 set `K₀` of initial points, a closed relation `N` between initial and terminal points, and terminal
 times in a window `[T₀, T₁]` (`ControlSystem.isCompact_constrainedEndpoints`,
-`ControlSystem.exists_optimal_constrained`). Their proofs are not written yet (two `sorry`s).
+`ControlSystem.exists_optimal_constrained`), by the same argument: uniform limits of trajectories
+in the closed set `S` stay in `S`, so continuity and convexity are needed only there.
 
 ### Measurable selection
 
@@ -500,7 +501,7 @@ definitions, and checks that no line exceeds 100 characters.
 | [`OptimalControl/MeasureTheory/MeasurableSelection.lean`](OptimalControl/MeasureTheory/MeasurableSelection.lean) | measurable selection of zeros of Carathéodory functions on a compact set; measurability of `{t \| ∃ w ∈ C, g t w = 0}` |
 | [`OptimalControl/MeasureTheory/LebesguePoints.lean`](OptimalControl/MeasureTheory/LebesguePoints.lean) | Lebesgue points of a function within an interval: almost every point is one, and they are dense |
 | [`OptimalControl/ODE/ControlSystem.lean`](OptimalControl/ODE/ControlSystem.lean) | Filippov's theorem, existence of optimal controls; the fundamental theorem of calculus for Lipschitz curves |
-| [`OptimalControl/ODE/StateConstraint.lean`](OptimalControl/ODE/StateConstraint.lean) | Filippov's theorem and the existence of optimal controls with a closed state constraint, a compact set of initial points, a closed endpoint relation and a window of terminal times (statements; proofs to come) |
+| [`OptimalControl/ODE/StateConstraint.lean`](OptimalControl/ODE/StateConstraint.lean) | Filippov's theorem and the existence of optimal controls with a closed state constraint, a compact set of initial points, a closed endpoint relation and a window of terminal times |
 | [`OptimalControl/ODE/Caratheodory.lean`](OptimalControl/ODE/Caratheodory.lean) | bounded `C¹` and Lipschitz control systems, existence and uniqueness of Carathéodory solutions, the flow, Gronwall's inequality, the cut-off |
 | [`OptimalControl/ODE/LinearCaratheodory.lean`](OptimalControl/ODE/LinearCaratheodory.lean) | the resolvent of a linear equation with measurable coefficients, the adjoint equation |
 | [`OptimalControl/ODE/FlowDerivative.lean`](OptimalControl/ODE/FlowDerivative.lean) | the derivative of the flow in the initial point is the resolvent of the variational equation |
