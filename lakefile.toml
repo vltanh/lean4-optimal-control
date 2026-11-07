@@ -1,0 +1,25 @@
+name = "OptimalControl"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["OptimalControl"]
+
+[leanOptions]
+pp.unicode.fun = true
+autoImplicit = false
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+maxSynthPendingDepth = 3
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.36.0-rc2"
+
+[[require]]
+name = "FixedPoint"
+git = "https://github.com/vltanh/lean4-fixed-point"
+rev = "6894a0f32ab2432e7ae34537a4dbb83d52ae7b9d"
+
+[[lean_lib]]
+name = "OptimalControl"
+globs = ["OptimalControl.*"]

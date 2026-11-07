@@ -1,0 +1,37 @@
+name: Lean Action CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read # Read access to repository contents
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: leanprover/lean-action@v1
+      # The audit sees a module's proofs only through its own `import all` line.
+      - name: Check that the audit imports every module of the library
+        run: >-
+          diff <(find OptimalControl -name '*.lean' | sed 's/\.lean$//; s#/#.#g' | sort)
+          <(grep -E '^import all OptimalControl\.' scripts/Audit.lean | sed 's/^import all //' | sort)
+      # While the library has `sorry`s, the audit lists them in a warning and fails only on other
+      # axioms; it fails on `sorry` too once `Audit.allowSorry` is set to `false`.
+      - name: Audit axioms
+        run: lake env lean scripts/Audit.lean
+      - name: Check that no line exceeds 100 characters
+        shell: python3 {0}
+        run: |
+          import glob, sys
+          files = ["OptimalControl.lean", *glob.glob("OptimalControl/**/*.lean", recursive=True),
+                   *glob.glob("scripts/*.lean")]
+          long = [f"{f}:{i}" for f in files
+                  for i, line in enumerate(open(f, encoding="utf-8").read().split("\n"), 1)
+                  if len(line) > 100]
+          print("\n".join(long))
+          sys.exit(1 if long else 0)
