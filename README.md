@@ -13,6 +13,34 @@ Everything is proved. There is no `sorry`, no `axiom` and no `native_decide`, an
 library, private and auxiliary ones included, depend only on Lean's standard axioms `propext`,
 `Classical.choice` and `Quot.sound` (it fails on any other axiom, `sorryAx` included).
 
+## Lean statement of record
+
+[`OptimalControlChallenge.lean`](OptimalControlChallenge.lean) is the Lean statement of record. It
+imports only Mathlib and states, with `sorry`, the maximum principle
+(`OptimalControlChallenge.maximum_principle`), Filippov's theorem
+(`OptimalControlChallenge.isCompact_reachableSet`, `OptimalControlChallenge.isCompact_reachableSetLE`)
+and the existence of optimal controls (`OptimalControlChallenge.exists_optimal_fixedTime`,
+`OptimalControlChallenge.exists_optimal_freeTime`); its module docstring explains every convention
+the statements use. [`OptimalControlSolution.lean`](OptimalControlSolution.lean) restates them word
+for word and proves them from the library, and [`comparator.json`](comparator.json) configures
+Palomar's Comparator, which checks that the Solution proves exactly the Challenge's statements and
+uses only the standard axioms:
+
+```sh
+lake env lake comparator --config=comparator.json   # needs bubblewrap; expect "Your solution is okay!"
+```
+
+The definitions that the statements use are kept in [`OptimalControl/Defs.lean`](OptimalControl/Defs.lean)
+between two marker comments and copied word for word into the Challenge by
+`python3 scripts/sync_challenge_defs.py` (CI checks the copy with `--check`), so that the Challenge
+and the library elaborate the same constants. The Challenge's statements are those of the library
+below, except that Filippov's theorem and the existence of optimal controls are stated without the
+Borel σ-algebra on `E` (and, for the existence of optimal controls, the completeness of `E`) that
+the library's statements carry, and Filippov's theorem without the hypothesis `0 ≤ M` (for `M < 0`
+the attainable sets are empty); `OptimalControlSolution.lean` supplies them.
+[`formalization.yaml`](formalization.yaml) holds the metadata (`formalization.yaml` v0.4): the
+source, the readings and departures, the related formal work and the production process.
+
 ## Main results
 
 `E`, `V`, `P` and `Q` are finite-dimensional real normed spaces: `E` is the state space, `V` the
@@ -45,9 +73,7 @@ In words: near `(q(0), q(T))` the set `N` contains the zeros of a `C¹` map `G` 
 derivative; then there are `ν ≤ 0` and a Lipschitz covector curve `p` with `(ν, p(t)) ≠ 0` for
 every `t`, the adjoint equation, the maximum condition and `H = 0` for almost every `t`, and the
 transversality condition `(-p(0), p(T)) ⊥ ker G'(q(0), q(T))`. The definitions
-([`OptimalControl/Pontryagin/Defs.lean`](OptimalControl/Pontryagin/Defs.lean),
-[`OptimalControl/ODE/Caratheodory.lean`](OptimalControl/ODE/Caratheodory.lean),
-[`OptimalControl/ODE/ControlSystem.lean`](OptimalControl/ODE/ControlSystem.lean)):
+([`OptimalControl/Defs.lean`](OptimalControl/Defs.lean)):
 
 - `ControlSystem.IsC1On f Ω U`: Agrachev and Sachkov's regularity (10.2)–(10.4) with `C¹` for
   `C^∞`: `(x, u) ↦ f x u` and `(x, u) ↦ ∂ₓf(x, u)` are continuous on `Ω × U`, and `f(·, u)` is
@@ -120,7 +146,10 @@ def IsStrongLocalMinimizer (f : E → V → E) (φ : E → V → ℝ) (Ω : Set 
       (∀ σ ∈ Icc (0 : ℝ) 1, ‖q' (σ * T') - q (σ * T)‖ < ε) → cost φ T u q ≤ cost φ T' u' q'
 ```
 
-`stateTransition A s t` is the resolvent of `ξ' = A(t) ξ` from time `s` to time `t`
+`attainableSet` and `needleVector` are defined in
+[`OptimalControl/Pontryagin/Defs.lean`](OptimalControl/Pontryagin/Defs.lean), the others in
+[`OptimalControl/Defs.lean`](OptimalControl/Defs.lean). `stateTransition A s t` is the resolvent of
+`ξ' = A(t) ξ` from time `s` to time `t`
 ([`OptimalControl/ODE/LinearCaratheodory.lean`](OptimalControl/ODE/LinearCaratheodory.lean)).
 </details>
 
@@ -414,6 +443,14 @@ exactly.
   12).
 - R. V. Gamkrelidze, *Principles of Optimal Control Theory*, Plenum, 1978.
 
+### Other formalizations
+
+The Lean development [willcforte/pontryagin-lean](https://github.com/willcforte/pontryagin-lean)
+("An attempt to formalize Pontryagin's Maximum Principle in Lean") states the key steps of the
+proof (Carathéodory existence, the adjoint equation, the tangent cone of the attainable set, the
+separation) as axioms. No complete formal proof of the maximum principle was found. This package
+does not depend on that development; its proofs follow Agrachev and Sachkov.
+
 ## Using it from another Lake project
 
 Add to the `lakefile.toml` of your project, with a full commit hash of this repository in place of
@@ -434,13 +471,17 @@ module, or `import OptimalControl` for everything. The package requires Lean and
 ## Building
 
 ```sh
-lake exe cache get                 # Mathlib's compiled files
-lake build
-lake env lean scripts/Audit.lean   # the axioms of the main theorems; fails on any other axiom
+lake exe cache get                               # Mathlib's compiled files
+lake build                                       # the library, the Challenge and the Solution
+lake env lean scripts/Audit.lean                 # the axioms; fails on any non-standard axiom
+python3 scripts/sync_challenge_defs.py --check   # the Challenge's copy of the shared definitions
+lake env lake comparator --config=comparator.json   # the Solution proves the Challenge
 ```
 
-The build has no warnings; CI builds with `--wfail`, runs the audit, checks that the audit imports
-every module, and checks that no line exceeds 100 characters.
+The library and the Solution build without warnings, and the Challenge's only warnings are its
+`sorry`s. CI builds the library and the Solution with `--wfail`, builds the Challenge, runs the
+audit, checks that the audit imports every module, checks the Challenge's copy of the shared
+definitions, and checks that no line exceeds 100 characters.
 
 ## Layout
 
@@ -448,10 +489,11 @@ every module, and checks that no line exceeds 100 characters.
 | --- | --- |
 | [`OptimalControl.lean`](OptimalControl.lean) | imports the whole library |
 | [`OptimalControl/Pontryagin.lean`](OptimalControl/Pontryagin.lean) | imports the maximum principle, and through it every other module |
+| [`OptimalControl/Defs.lean`](OptimalControl/Defs.lean) | the definitions that the statements of record use (shared with the Challenge): admissible pairs, attainable sets, `IsC1On`, cost, Hamiltonian, the adjoint equation, the maximum condition, strong local minimizers |
 | [`OptimalControl/MeasureTheory/MeasurableSelection.lean`](OptimalControl/MeasureTheory/MeasurableSelection.lean) | measurable selection of zeros of Carathéodory functions on a compact set; measurability of `{t \| ∃ w ∈ C, g t w = 0}` |
 | [`OptimalControl/MeasureTheory/LebesguePoints.lean`](OptimalControl/MeasureTheory/LebesguePoints.lean) | Lebesgue points of a function within an interval: almost every point is one, and they are dense |
-| [`OptimalControl/ODE/ControlSystem.lean`](OptimalControl/ODE/ControlSystem.lean) | control systems with Carathéodory trajectories, Filippov's theorem, existence of optimal controls; the fundamental theorem of calculus for Lipschitz curves |
-| [`OptimalControl/ODE/Caratheodory.lean`](OptimalControl/ODE/Caratheodory.lean) | `C¹` control systems (`IsC1On`), existence and uniqueness of Carathéodory solutions, the flow, Gronwall's inequality, the cut-off |
+| [`OptimalControl/ODE/ControlSystem.lean`](OptimalControl/ODE/ControlSystem.lean) | Filippov's theorem, existence of optimal controls; the fundamental theorem of calculus for Lipschitz curves |
+| [`OptimalControl/ODE/Caratheodory.lean`](OptimalControl/ODE/Caratheodory.lean) | bounded `C¹` and Lipschitz control systems, existence and uniqueness of Carathéodory solutions, the flow, Gronwall's inequality, the cut-off |
 | [`OptimalControl/ODE/LinearCaratheodory.lean`](OptimalControl/ODE/LinearCaratheodory.lean) | the resolvent of a linear equation with measurable coefficients, the adjoint equation |
 | [`OptimalControl/ODE/FlowDerivative.lean`](OptimalControl/ODE/FlowDerivative.lean) | the derivative of the flow in the initial point is the resolvent of the variational equation |
 | [`OptimalControl/ODE/VariationsFormula.lean`](OptimalControl/ODE/VariationsFormula.lean) | the variations formula along a trajectory; Proposition 11.3 read pointwise |
@@ -459,17 +501,20 @@ every module, and checks that no line exceeds 100 characters.
 | [`OptimalControl/ODE/TimeChange.lean`](OptimalControl/ODE/TimeChange.lean) | measurable changes of time |
 | [`OptimalControl/Convex/Cone/Support.lean`](OptimalControl/Convex/Cone/Support.lean) | supporting hyperplanes and finite generation of convex cones |
 | [`OptimalControl/Convex/Cone/Openness.lean`](OptimalControl/Convex/Cone/Openness.lean) | openness at the vertex of a cone (Lemma 12.1 with its Remark (1)), by Brouwer's theorem |
-| [`OptimalControl/Pontryagin/Defs.lean`](OptimalControl/Pontryagin/Defs.lean) | admissible pairs, attainable sets, cost, Hamiltonian, needle vectors, the adjoint equation, the maximum condition, strong local minimizers |
+| [`OptimalControl/Pontryagin/Defs.lean`](OptimalControl/Pontryagin/Defs.lean) | attainable sets in `Ω`, local attainable sets, needle vectors |
 | [`OptimalControl/Pontryagin/Geometric.lean`](OptimalControl/Pontryagin/Geometric.lean) | Lemmas 12.1, 12.2 and Theorem 12.1, and the general form `exists_costate_of_boundary` |
 | [`OptimalControl/Pontryagin/FreeTime.lean`](OptimalControl/Pontryagin/FreeTime.lean) | Theorem 12.2 (free time) |
 | [`OptimalControl/Pontryagin/IntegralCost.lean`](OptimalControl/Pontryagin/IntegralCost.lean) | Theorems 12.3–12.5 (integral cost, fixed time, boundary conditions) |
 | [`OptimalControl/Pontryagin/MaximumPrinciple.lean`](OptimalControl/Pontryagin/MaximumPrinciple.lean) | the maximum principle with free time, cost and mixed boundary conditions |
+| [`OptimalControlChallenge.lean`](OptimalControlChallenge.lean), [`OptimalControlSolution.lean`](OptimalControlSolution.lean), [`comparator.json`](comparator.json), [`formalization.yaml`](formalization.yaml) | the statements of record, their proofs, Comparator's configuration, the metadata (Palomar) |
 | [`scripts/Audit.lean`](scripts/Audit.lean) | the axiom audit |
-| [`.github/workflows/lean_action_ci.yml`](.github/workflows/lean_action_ci.yml) | CI: build without warnings, audit, import list of the audit, line lengths |
+| [`scripts/sync_challenge_defs.py`](scripts/sync_challenge_defs.py) | copies the shared definitions into the Challenge (`--check`: checks the copy) |
+| [`.github/workflows/lean_action_ci.yml`](.github/workflows/lean_action_ci.yml) | CI: build without warnings, the Challenge, audit, import list of the audit, the Challenge's copy of the definitions, line lengths |
+| [`.github/workflows/palomar_preflight.yml`](.github/workflows/palomar_preflight.yml) | Palomar's mechanical verification of a commit, run only on demand |
 
 ## Credits
 
-- Maintained by The-Anh Vu-Le.
+- Author of record and maintainer: The-Anh Vu-Le.
 - Written by Claude (Opus 5.5, model `claude-opus-5-5`) in Claude Code.
 - No person has reviewed the proofs; Lean has checked them.
 

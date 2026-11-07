@@ -14,10 +14,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
-      # Builds the library with Mathlib's cache; `--wfail` makes any warning fail the build.
+      # Builds the library and the Solution with Mathlib's cache; `--wfail` makes any warning fail
+      # the build. The Challenge is built in the next step, since its `sorry`s are warnings.
       - uses: leanprover/lean-action@v1
         with:
-          build-args: "--wfail"
+          build-args: "--wfail OptimalControl OptimalControlSolution"
+      - name: Build the Challenge (statements with `sorry`)
+        run: lake build OptimalControlChallenge
       # The audit sees a module's proofs only through its own `import all` line.
       - name: Check that the audit imports every module of the library
         run: >-
@@ -26,12 +29,16 @@ jobs:
       # Fails on `sorry` and on any axiom other than `propext`, `Classical.choice`, `Quot.sound`.
       - name: Audit axioms
         run: lake env lean scripts/Audit.lean
+      - name: Check that the Challenge's copy of the shared definitions is current
+        run: python3 scripts/sync_challenge_defs.py --check
       - name: Check that no line exceeds 100 characters
         shell: python3 {0}
         run: |
           import glob, sys
-          files = ["OptimalControl.lean", *glob.glob("OptimalControl/**/*.lean", recursive=True),
-                   *glob.glob("scripts/*.lean")]
+          files = ["OptimalControl.lean", "OptimalControlChallenge.lean",
+                   "OptimalControlSolution.lean",
+                   *glob.glob("OptimalControl/**/*.lean", recursive=True),
+                   *glob.glob("scripts/*.lean"), *glob.glob("scripts/*.py")]
           long = [f"{f}:{i}" for f in files
                   for i, line in enumerate(open(f, encoding="utf-8").read().split("\n"), 1)
                   if len(line) > 100]

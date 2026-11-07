@@ -71,17 +71,10 @@ variable {E V F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimen
   [NormedAddCommGroup V]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
 
-/-! ### Regularity of control systems -/
+/-! ### Regularity of control systems
 
-/-- The regularity of Agrachev–Sachkov's control systems on an open set `Ω`, conditions
-(10.2)–(10.4) of their §10.1 (authors' draft, p. 133) with `C¹` in place of `C^∞` (departure D3):
-`(x, u) ↦ f x u` is continuous on `Ω × U`, `x ↦ f x u` is differentiable on `Ω` for `u ∈ U`, and
-`(x, u) ↦ ∂ₓf(x, u)` is continuous on `Ω × U`. The same conditions are imposed on the integrand
-`φ` of a cost (`F = ℝ`). -/
-structure IsC1On (f : E → V → F) (Ω : Set E) (U : Set V) : Prop where
-  continuousOn : ContinuousOn (fun p : E × V ↦ f p.1 p.2) (Ω ×ˢ U)
-  differentiableAt : ∀ x ∈ Ω, ∀ u ∈ U, DifferentiableAt ℝ (f · u) x
-  continuousOn_fderiv : ContinuousOn (fun p : E × V ↦ fderiv ℝ (f · p.2) p.1) (Ω ×ˢ U)
+`ControlSystem.IsC1On`, the regularity of Agrachev–Sachkov's control systems, is defined in
+`OptimalControl/Defs.lean`. -/
 
 /-- A globally bounded `C¹` control system: `U` is compact, `f` is `C¹` on all of `E`
 (`IsC1On f univ U`), `‖f x u‖ ≤ M` and `‖∂ₓf(x, u)‖ ≤ L` for all `x` and `u ∈ U`. This is what

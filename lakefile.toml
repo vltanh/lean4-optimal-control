@@ -1,7 +1,7 @@
 name = "OptimalControl"
 version = "0.1.0"
 keywords = ["math"]
-defaultTargets = ["OptimalControl"]
+defaultTargets = ["OptimalControl", "OptimalControlChallenge", "OptimalControlSolution"]
 
 [leanOptions]
 pp.unicode.fun = true
@@ -23,3 +23,10 @@ rev = "6894a0f32ab2432e7ae34537a4dbb83d52ae7b9d"
 [[lean_lib]]
 name = "OptimalControl"
 globs = ["OptimalControl.*"]
+
+# Palomar: the statements of record (with `sorry`) and their proofs from the library.
+[[lean_lib]]
+name = "OptimalControlChallenge"
+
+[[lean_lib]]
+name = "OptimalControlSolution"

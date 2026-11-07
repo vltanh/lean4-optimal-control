@@ -6,6 +6,7 @@ public meta import Lean.Elab.Command
 --   find OptimalControl -name '*.lean' | sort | sed 's/\.lean$//; s#/#.#g; s/^/import all /'
 import all OptimalControl.Convex.Cone.Openness
 import all OptimalControl.Convex.Cone.Support
+import all OptimalControl.Defs
 import all OptimalControl.MeasureTheory.LebesguePoints
 import all OptimalControl.MeasureTheory.MeasurableSelection
 import all OptimalControl.ODE.Caratheodory

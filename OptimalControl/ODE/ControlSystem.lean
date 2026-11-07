@@ -1,5 +1,6 @@
 module
 
+public import OptimalControl.Defs
 public import OptimalControl.MeasureTheory.MeasurableSelection
 public import Mathlib.Analysis.Calculus.FDeriv.Measurable
 public import Mathlib.Analysis.Convex.Integral
@@ -18,7 +19,8 @@ controls in a metric space `V` (for instance `ℝᵐ`): `F : E → V → E` is j
 measurable control `u` with values in `U` on `[0, T]` and a trajectory `x`, continuous on `[0, T]`,
 with `x(t) = x₀ + ∫₀ᵗ F(x(s), u(s)) ds` (a Carathéodory solution). The *attainable* (reachable) sets
 are `reachableSet F U x₀ T`, the endpoints `x(T)`, and `reachableSetLE F U x₀ T`, their union over
-the times `τ ∈ [0, T]`.
+the times `τ ∈ [0, T]`. These three definitions are in `OptimalControl/Defs.lean`, with the other
+definitions that the statements of record use.
 
 **Filippov's theorem**: if the velocity sets `F(x, U)` are convex and the velocities are bounded
 along admissible trajectories, the attainable sets are compact (`isCompact_reachableSet`,
@@ -106,25 +108,6 @@ theorem IsCompact.exists_neBot_le_atTop_tendsto {X : Type*} [TopologicalSpace X]
 namespace ControlSystem
 
 variable {E V : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [MeasurableSpace V]
-
-/-- An admissible pair on `[0, T]` from `x₀` for the control system `x' = F(x, u)`, `u ∈ U`: a
-measurable control `u` with values in `U` on `[0, T]` and a trajectory `x`, continuous on
-`[0, T]`, with `t ↦ F(x(t), u(t))` integrable and `x(t) = x₀ + ∫₀ᵗ F(x(s), u(s)) ds` on
-`[0, T]`. -/
-def IsAdmissible (F : E → V → E) (U : Set V) (x₀ : E) (T : ℝ) (u : ℝ → V) (x : ℝ → E) : Prop :=
-  Measurable u ∧ (∀ t ∈ Icc 0 T, u t ∈ U) ∧ ContinuousOn x (Icc 0 T) ∧
-    IntervalIntegrable (fun s ↦ F (x s) (u s)) volume 0 T ∧
-    ∀ t ∈ Icc 0 T, x t = x₀ + ∫ s in (0 : ℝ)..t, F (x s) (u s)
-
-/-- The attainable set at time `T`: the endpoints `x(T)` of the admissible trajectories on
-`[0, T]` from `x₀`. -/
-def reachableSet (F : E → V → E) (U : Set V) (x₀ : E) (T : ℝ) : Set E :=
-  {p | ∃ u x, IsAdmissible F U x₀ T u x ∧ x T = p}
-
-/-- The attainable set for times at most `T`: the union of the `reachableSet F U x₀ τ`,
-`τ ∈ [0, T]`. -/
-def reachableSetLE (F : E → V → E) (U : Set V) (x₀ : E) (T : ℝ) : Set E :=
-  ⋃ τ ∈ Icc 0 T, reachableSet F U x₀ τ
 
 /-- A curve frozen outside `[0, τ]`: `freeze x τ t = x (max 0 (min t τ))`. -/
 def freeze (x : ℝ → E) (τ : ℝ) : ℝ → E := fun t ↦ x (max 0 (min t τ))

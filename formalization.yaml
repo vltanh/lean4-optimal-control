@@ -1,0 +1,271 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "The Pontryagin maximum principle and Filippov's theorem"
+  description: >-
+    A Lean 4 formalization, with Mathlib, of the Pontryagin maximum principle and of Filippov's
+    theorem, following A. A. Agrachev and Yu. L. Sachkov, Control Theory from the Geometric
+    Viewpoint (Encyclopaedia of Mathematical Sciences 87, Springer, 2004), Chapter 12 and Theorem
+    10.1. Control systems q' = f(q, u) live on an open subset of a finite-dimensional real normed
+    space, with measurable controls taking values in a compact set and trajectories in the sense
+    of Caratheodory.
+
+
+    The main result is the maximum principle with free terminal time, an integral cost and mixed
+    boundary conditions (q(0), q(T)) in N, for strong local minimizers, with C^1 data: there are
+    nu <= 0 and a Lipschitz covector curve p, with (nu, p(t)) nonzero for every t, that satisfy the
+    adjoint equation, the maximum condition and the vanishing of the Hamiltonian for almost every
+    t, and the transversality condition. Agrachev and Sachkov leave this case to the reader; their
+    Lemmas 12.1 and 12.2 and Theorems 12.1-12.5 (the geometric maximum principle, free time without
+    cost, and integral costs with fixed, separated and mixed boundary conditions) are proved too.
+    Filippov's theorem: for a continuous control system with compact control set, convex velocity
+    sets and bounded velocities, the attainable sets at time T and up to time T are compact; hence
+    optimal controls exist for integral costs whose extended velocity sets are convex, with fixed
+    or free terminal time.
+
+
+    Everything the proofs use is proved: existence, uniqueness and differentiable dependence of
+    Caratheodory solutions, the variations formula and needle variations, Lebesgue points, and
+    measurable selection (Kuratowski-Ryll-Nardzewski). Brouwer's fixed-point theorem is taken from
+    the separate Lean package FixedPoint. No axiom beyond Lean's standard three is used.
+  authors:
+    - "The-Anh Vu-Le"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "The-Anh Vu-Le"
+
+classification:
+  arxiv: ["math.OC"]
+  msc2020: ["49K15", "49J15", "93B03", "93C15", "34A12"]
+
+sources:
+  - title: "Control Theory from the Geometric Viewpoint"
+    authors:
+      - "Andrei A. Agrachev"
+      - "Yuri L. Sachkov"
+    id: "doi:10.1007/978-3-662-06404-7"
+    type: "book"
+    location: >-
+      Encyclopaedia of Mathematical Sciences 87, Springer, 2004; Chapter 12 (Lemmas 12.1-12.2,
+      Theorems 12.1-12.5) and Theorem 10.1 (Filippov's theorem)
+    relationship: "formalizes"
+    note: >-
+      The authors' draft of the book (preface dated September 2003), posted on A. A. Agrachev's
+      home page (https://people.sissa.it/~agrachev/agrachev_files/books.html), was used; page
+      numbers in the documentation are the draft's. Formalized: Chapter 12 (the Pontryagin maximum
+      principle: Lemmas 12.1 and 12.2, Theorems 12.1-12.5, and the free-time case with a cost and
+      mixed boundary conditions that the remarks after Theorems 12.3-12.5 leave to the reader) and
+      Theorem 10.1 (Filippov's theorem), with the existence of optimal controls for integral costs
+      that follows from it. The readings and departures D1-D11 are listed under fidelity.
+    author_endorsement: "not-contacted"
+  - title: "Principles of Optimal Control Theory"
+    authors:
+      - "R. V. Gamkrelidze"
+    type: "book"
+    location: "Plenum Press, New York, 1978"
+    relationship: "background"
+    note: >-
+      Cited by Agrachev and Sachkov for the Caratheodory theory of control systems (existence,
+      uniqueness and differentiable dependence of solutions); these facts are proved in the
+      formalization by Picard iteration and Gronwall's inequality (departure D11).
+    author_endorsement: "not-contacted"
+
+related_formalizations:
+  - id: "https://github.com/willcforte/pontryagin-lean"
+    relationship: "independent"
+    note: >-
+      An earlier Lean 4 development ("An attempt to formalize Pontryagin's Maximum Principle in
+      Lean", May 2026) that states the key steps of the proof (Caratheodory existence, the adjoint
+      equation, the tangent cone of the attainable set, the separation of cones, among others) as
+      axioms, so it is not a complete formal proof. This work does not use it; its proofs follow
+      Agrachev and Sachkov. No complete formal proof of the maximum principle was found.
+
+status:
+  scope: >-
+    Formalized, from Agrachev and Sachkov's book (authors' draft): Chapter 12, that is Lemma 12.1
+    (with its Remark (1), on any convex cone), Lemma 12.2, Theorems 12.1-12.5, and the maximum
+    principle with free terminal time, an integral cost and mixed boundary conditions that the
+    remarks after Theorems 12.3-12.5 leave to the reader, for strong local minimizers; Theorem 10.1
+    (Filippov's theorem: the attainable sets at time T and up to time T are compact) and the
+    existence of optimal controls for integral costs with fixed and free terminal time; Proposition
+    11.3 and the variations formula (12.13), read pointwise along trajectories (D2); and the
+    Caratheodory theory that the source cites (D11). The Challenge states the maximum principle
+    (free time, cost, mixed boundary conditions), Filippov's theorem in both forms and the
+    existence of optimal controls in both forms; Theorems 12.1-12.5 are proved in the library
+    (Pontryagin.theorem12_1 to theorem12_5) but are not part of the Challenge. Not formalized: the
+    setting of manifolds (the state space is an open subset of a finite-dimensional real normed
+    space, D1), the chronological calculus as such (D2), and the other results and chapters of the
+    book. Brouwer's fixed-point theorem comes from the FixedPoint package, a dependency of the
+    proofs only (D10). Nothing is assumed: there is no sorry and no axiom, and the axiom audit
+    (scripts/Audit.lean) checks every declaration of the library.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["claude-opus-5-5"]
+      framework: "Claude Code 2.1.318 (Claude Agent SDK)"
+      tool_setup: >-
+        Claude Code with the model claude-opus-5-5: the agent wrote the Lean code, its
+        documentation and the Palomar packaging, and ran the Lean builds, the axiom audit and
+        Comparator locally.
+      cost:
+        wall_time: "not tracked"
+        spend_usd: "not tracked"
+        hardware: "local machine (Linux) for Lean builds; model via API"
+      prompting_notes: "not recorded"
+  spend_usd: "not tracked"
+  notes: >-
+    Claude Opus 5.5 (model claude-opus-5-5) in Claude Code wrote the Lean code. The-Anh Vu-Le is
+    the author of record and maintainer, and is responsible for the package. No person has
+    reviewed the proofs; Lean's kernel has checked them, and Comparator checks that the Solution
+    proves the Challenge's statements with the standard axioms only.
+
+fidelity:
+  divergences: >-
+    Readings and departures from Agrachev and Sachkov (authors' draft; README, "Readings and
+    departures from Agrachev-Sachkov"). D1: the manifold M is an open subset Omega of a
+    finite-dimensional real normed space E. D2: the chronological calculus (operators on
+    C^infinity(M); (2.19), (2.28), (2.31), Proposition 11.3) is read pointwise along trajectories,
+    in coordinates: the vectors g_{tau,u} through the resolvent of the variational equation,
+    Proposition 11.3 as the adjoint equation, the variations formula (12.13) as an integral
+    equation for the transported trajectory. D3: the system and the cost are C^1 in the state
+    instead of C^infinity (a generalization). D4: U is compact (the local boundedness of
+    f(q, u(t)) is tacit in the source); the auxiliary parameter sets of Sections 12.3-12.4
+    (|v - 1| < delta, v >= 0) are compact intervals. D5: strong local minimizers instead of
+    optimal (globally minimizing) controls (a generalization). D6: free time together with a cost
+    and mixed boundary conditions, which Agrachev and Sachkov leave to the reader (an exercise
+    after Theorem 12.3, p. 177; remarks after Theorems 12.4 and 12.5, pp. 179 and 184), is proved
+    by applying the reductions of Theorems 12.2, 12.3 and 12.5 through one auxiliary system. D7:
+    time changes are measurable (a forced departure): Agrachev and Sachkov derive the
+    reparametrization for a smooth new time (p. 173) and apply it to measurable v; here, for v
+    measurable with values in [c1, c2], c1 > 0, and theta(t) = int_0^t v, the push-forward of
+    v Leb|[0, T] under theta is Leb|[0, theta(T)], which gives the change of variables in the
+    integral equation and in the cost (Mathlib's substitution lemmas need a derivative at every
+    point, while theta' = v holds only almost everywhere). D8: Lemma 12.1 in the form of its
+    Remark (1), on any convex cone, with F Lipschitz only near 0 on the cone and differentiable at
+    0 within it. D9: one supporting covector for all needle variations at once, in Theorems 12.4
+    and 12.5: the proof of Theorem 12.4 takes, in (12.41), a covector for each finite needle
+    variation, while the maximum condition at almost every t needs a single one. D10: Brouwer's
+    theorem, for which the source gives no reference, comes from the FixedPoint package. D11:
+    Caratheodory well-posedness and differentiable dependence, which the source cites to
+    Gamkrelidze (1978), are proved by Picard iteration and Gronwall's inequality; a cut-off to a
+    compact tube around the reference trajectory replaces the source's assumption that the vector
+    fields are complete.
+
+
+    Further readings: 0 < t1 is Agrachev and Sachkov's standing assumption ("Fix an arbitrary
+    instant t1 > 0", p. 163) and a hypothesis of Lemma 12.2 and of the theorems (it is needed: for
+    M = R, U = [-1, 1], f(q, u) = u and u~ = 0, the vectors g_{0,u}(q0) = u generate R, but the
+    attainable set at time 0 is {q0}); the hypothesis that the end point lies on the boundary of
+    the attainable set is weakened, in lemma12_2_local and exists_costate_of_boundary, to "not an
+    interior point of the image of the attainable set of nearby trajectories", which is what the
+    proofs use; the nontriviality (lambda_t, nu) != (0, 0) of (12.32) is stated for every t (in
+    Theorem 12.5 through the uniqueness for the adjoint equation); the needle intervals are
+    half-open, so that the zero variation is the reference control exactly. The boundary sets N0,
+    N1 and N enter, as in Agrachev and Sachkov's proof, only near the end points: N0 through a C^1
+    parametrization, N1 and N through C^1 maps with surjective derivative whose zeros lie in them;
+    in Theorem 12.4 the hypotheses q(0) in N0 and q(t1) in N1 are kept although the proof does not
+    use them. Filippov's theorem (Theorem 10.1) is stated on E rather than on a manifold, for F
+    jointly continuous and control values in a metric space with its Borel sigma-algebra, with
+    compact U, convex velocity sets F(x, U), and a bound on the velocities along admissible
+    trajectories as a hypothesis; the existence of optimal controls is derived for integral costs
+    whose extended velocity sets {(F(x, u), phi(x, u)) | u in U} are convex, through the system
+    extended by the cost. The Challenge states Filippov's theorem without the library's hypothesis
+    0 <= M (for M < 0 there is no admissible pair and the attainable sets are empty), and Filippov's
+    theorem and the existence of optimal controls without a sigma-algebra on E (and without the
+    completeness of E, which follows from finite dimension); the Solution supplies them.
+
+
+    Gaps found in the source (README, "Gaps in Agrachev-Sachkov"). Lemma 12.1, Remark (1): the
+    proof takes points in the interior of the cone, which is empty for a convex cone with empty
+    interior, a case the remark allows; the proof here takes the points v + L z as combinations of
+    points of the cone with positive coefficients, so it uses no interior (for the cones to which
+    the lemma is applied, R^k_+ and P x R^k_+, the source's step is valid as written). A needle at
+    t1: in the proof of Lemma 12.2 the set of Lebesgue points may contain t1, and a needle at t1
+    gives no variation on [0, t1]; such a needle time is moved to a nearby Lebesgue point of
+    (0, t1), as Agrachev and Sachkov move repeated times. The needle map: that the end-point map of
+    the needle variations is Lipschitz and differentiable at 0, with partial derivatives
+    g_{tau_i,u_i}(q1) (p. 172), is stated without proof; it is proved
+    (OptimalControl/ODE/NeedleVariation.lean).
+
+
+    Proofs: the maximum principle, Lemmas 12.1-12.2 and Theorems 12.1-12.5 follow Agrachev and
+    Sachkov's proofs, with the departures D2 and D6-D11 and the repairs of the gaps above; Lemma
+    12.1 is proved as they prove it (the rescaled maps converge uniformly, by Ascoli's lemma, to
+    the derivative, and Brouwer's theorem gives the openness). Filippov's theorem is proved by the
+    standard argument: the trajectories are equi-Lipschitz, a cluster point exists by Tychonoff's
+    theorem, its derivative lies in the convex velocity set almost everywhere, and a measurable
+    control realizing it is found by measurable selection.
+
+review:
+  status: "agent-reviewed"
+  reviewers:
+    - "none (no human review)"
+  notes: >-
+    Before the proofs were written, an independent agent reviewed the statements of Chapter 12
+    against Agrachev and Sachkov's draft; afterwards, independent agents compared the proofs with
+    the book's, and the departures they found that were not forced were removed (README,
+    "Readings and departures from Agrachev–Sachkov"). No person has reviewed the proofs or the
+    statements. Lean's kernel has checked the proofs; Comparator (with the Lean and NanoDa
+    kernels) checks that OptimalControlSolution proves the statements of OptimalControlChallenge
+    with the standard axioms only, and the axiom audit (scripts/Audit.lean) checks every
+    declaration of the library.
+
+alignment:
+  namespace: "OptimalControlChallenge"
+  statements:
+    - source: "Theorem 12.5 with Remark (1) after it (free terminal time), pp. 183-184"
+      lean: "OptimalControlChallenge.maximum_principle"
+      module: "OptimalControlChallenge"
+      status: "proved"
+      note: >-
+        The maximum principle with free terminal time, integral cost and mixed boundary conditions
+        (q(0), q(T)) in N, where near the end points N contains the zeros of a C^1 map G with
+        surjective derivative, for strong local minimizers (D5) of a C^1 system (D3) on an open
+        subset of a finite-dimensional normed space (D1) with compact control set (D4): nu <= 0, a
+        covector curve p Lipschitz on [0, T], (nu, p(t)) != 0 for every t, the adjoint equation in
+        integral form, the maximum condition and H = 0 almost everywhere, and the transversality
+        condition (-p(0), p(T)) orthogonal to ker G'(q(0), q(T)). The free-time case with a cost
+        is left to the reader by the source (D6). Library: Pontryagin.maximum_principle.
+    - source: "Theorem 10.1 (Filippov), attainable set at time T"
+      lean: "OptimalControlChallenge.isCompact_reachableSet"
+      module: "OptimalControlChallenge"
+      status: "proved"
+      note: >-
+        For F jointly continuous, U compact, convex velocity sets F(x, U) and velocities bounded
+        along the admissible pairs from x0 on [0, T], the attainable set at time T >= 0 is
+        compact. Library: ControlSystem.isCompact_reachableSet (with the hypothesis 0 <= M and a
+        Borel sigma-algebra on E, which the Solution supplies).
+    - source: "Theorem 10.1 (Filippov), attainable set up to time T"
+      lean: "OptimalControlChallenge.isCompact_reachableSetLE"
+      module: "OptimalControlChallenge"
+      status: "proved"
+      note: >-
+        Under the same hypotheses, with the velocities bounded along the admissible pairs on
+        [0, tau] for every tau in [0, T], the union of the attainable sets at the times
+        tau in [0, T] is compact. Library: ControlSystem.isCompact_reachableSetLE.
+    - source: "Existence of optimal controls with fixed terminal time (Theorem 10.1 applied to the system extended by the cost)"
+      lean: "OptimalControlChallenge.exists_optimal_fixedTime"
+      module: "OptimalControlChallenge"
+      status: "proved"
+      note: >-
+        For F and phi jointly continuous, U compact in a separable metric space, ||F|| <= M on
+        E x U and convex extended velocity sets {(F(x, u), phi(x, u)) | u in U}, among the
+        admissible pairs on [0, T] from x0 to an attainable x1 one has the least cost
+        int_0^T phi(x, u). Library: ControlSystem.exists_optimal_fixedTime.
+    - source: "Existence of optimal controls with free terminal time (Theorem 10.1 applied to the system extended by the cost)"
+      lean: "OptimalControlChallenge.exists_optimal_freeTime"
+      module: "OptimalControlChallenge"
+      status: "proved"
+      note: >-
+        Under the same hypotheses, among the admissible pairs from x0 to x1 on [0, tau] with
+        tau in [0, T] (if any), one has the least cost int_0^tau phi(x, u). Library:
+        ControlSystem.exists_optimal_freeTime.
+
+acknowledgements: >-
+  Mathlib and the Lean toolchain; Brouwer's fixed-point theorem from the FixedPoint package
+  (https://github.com/vltanh/lean4-fixed-point); Palomar's Comparator.

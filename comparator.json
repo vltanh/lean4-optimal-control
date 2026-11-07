@@ -1,0 +1,14 @@
+{
+  "challenge_module": "OptimalControlChallenge",
+  "solution_module": "OptimalControlSolution",
+  "theorem_names": [
+    "OptimalControlChallenge.maximum_principle",
+    "OptimalControlChallenge.isCompact_reachableSet",
+    "OptimalControlChallenge.isCompact_reachableSetLE",
+    "OptimalControlChallenge.exists_optimal_fixedTime",
+    "OptimalControlChallenge.exists_optimal_freeTime"
+  ],
+  "definition_names": [],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}
