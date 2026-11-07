@@ -14,6 +14,7 @@ import all OptimalControl.ODE.ControlSystem
 import all OptimalControl.ODE.FlowDerivative
 import all OptimalControl.ODE.LinearCaratheodory
 import all OptimalControl.ODE.NeedleVariation
+import all OptimalControl.ODE.StateConstraint
 import all OptimalControl.ODE.TimeChange
 import all OptimalControl.ODE.VariationsFormula
 import all OptimalControl.Pontryagin
@@ -58,6 +59,8 @@ meta def mainResults : List Name :=
    ``ControlSystem.isCompact_reachableSetLE,
    ``ControlSystem.exists_optimal_fixedTime,
    ``ControlSystem.exists_optimal_freeTime,
+   ``ControlSystem.isCompact_constrainedEndpoints,
+   ``ControlSystem.exists_optimal_constrained,
    -- measurable selection
    ``MeasureTheory.exists_measurable_forall_mem_and_eq_zero,
    ``MeasureTheory.exists_measurable_forall_mem_ae_eq_zero,
