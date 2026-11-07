@@ -54,7 +54,7 @@ is `y(t) = P_{t → c}(x(t))`:
 The second statement is `ControlSystem.fderiv_flow_eq_stateTransition` and
 `ControlSystem.adjoint_stateTransition`; the coefficient `r ↦ ∂ₓf(q̃(r), ũ(r))` is measurable
 because `∂ₓf`, continuous on `E × U`, extends continuously to `E × V` (Tietze;
-`ControlSystem.nv_aestronglyMeasurable_comp_of_continuousOn`).
+`ContinuousOn.comp_aestronglyMeasurable_of_isClosed`).
 -/
 
 @[expose] public section
@@ -62,10 +62,23 @@ because `∂ₓf`, continuous on `E × U`, extends continuously to `E × V` (Tie
 open MeasureTheory Set Filter Topology Metric
 open scoped NNReal Interval
 
+/-- A function continuous on a closed set `S` of a normal space, composed with an a.e. strongly
+measurable map with values in `S` almost everywhere, is a.e. strongly measurable (extend it to the
+whole space by Tietze's theorem). -/
+theorem ContinuousOn.comp_aestronglyMeasurable_of_isClosed {α X F : Type*} [MeasurableSpace α]
+    {μ : Measure α} [TopologicalSpace X] [NormalSpace X] [NormedAddCommGroup F]
+    [NormedSpace ℝ F] [FiniteDimensional ℝ F] {G : X → F} {S : Set X} (hG : ContinuousOn G S)
+    (hS : IsClosed S) {g : α → X} (hg : AEStronglyMeasurable g μ)
+    (hgS : ∀ᵐ x ∂μ, g x ∈ S) : AEStronglyMeasurable (fun x ↦ G (g x)) μ := by
+  obtain ⟨G', hG'⟩ := ContinuousMap.exists_restrict_eq hS ⟨S.domRestrict G, hG.domRestrict⟩
+  refine (G'.continuous.comp_aestronglyMeasurable hg).congr ?_
+  filter_upwards [hgS] with x hx
+  exact congrArg (fun φ : C(S, F) ↦ φ ⟨g x, hx⟩) hG'
+
 namespace ControlSystem
 
 variable {E V : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-  [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
+  [NormedAddCommGroup V]
 
 /-- Agrachev–Sachkov's field (12.12), `g_{t,w} = (P_{t → c})_* (f_w - f_{ũ(t)})`, with
 `P_{t → c}` the flow of the reference control `ũ`:
@@ -73,26 +86,13 @@ variable {E V : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensi
 noncomputable def variationField (f : E → V → E) (ũ : ℝ → V) (c t : ℝ) (w : V) (z : E) : E :=
   fderiv ℝ (flow f ũ t c) (flow f ũ c t z) (f (flow f ũ c t z) w - f (flow f ũ c t z) (ũ t))
 
-omit [FiniteDimensional ℝ E] [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
+omit [FiniteDimensional ℝ E] [NormedAddCommGroup V] in
 /-- `g_{t,ũ(t)} = 0`. -/
 theorem variationField_self (f : E → V → E) (ũ : ℝ → V) (c t : ℝ) (z : E) :
     variationField f ũ c t (ũ t) z = 0 := by
   simp [variationField]
 
 variable {f : E → V → E} {U : Set V} {M L : ℝ≥0} {ũ u : ℝ → V} {a b : ℝ}
-
-/-- A function continuous on a closed set `S`, composed with an a.e. strongly measurable map with
-values in `S` almost everywhere, is a.e. strongly measurable (extend it to the whole space by
-Tietze's theorem). -/
-theorem nv_aestronglyMeasurable_comp_of_continuousOn {α X F : Type*} [MeasurableSpace α]
-    {μ : Measure α} [TopologicalSpace X] [NormalSpace X] [NormedAddCommGroup F]
-    [NormedSpace ℝ F] [FiniteDimensional ℝ F] {G : X → F} {S : Set X} (hS : IsClosed S)
-    (hG : ContinuousOn G S) {g : α → X} (hg : AEStronglyMeasurable g μ)
-    (hgS : ∀ᵐ x ∂μ, g x ∈ S) : AEStronglyMeasurable (fun x ↦ G (g x)) μ := by
-  obtain ⟨G', hG'⟩ := ContinuousMap.exists_restrict_eq hS ⟨S.domRestrict G, hG.domRestrict⟩
-  refine (G'.continuous.comp_aestronglyMeasurable hg).congr ?_
-  filter_upwards [hgS] with x hx
-  exact congrArg (fun φ : C(S, F) ↦ φ ⟨g x, hx⟩) hG'
 
 /-- **The variations formula** (Agrachev–Sachkov (12.13), read pointwise): for every control `u`
 on `[a, b]`, the trajectory `x(t) = P^u_{s → t}(x₀)` transported by the reference flow,
@@ -156,8 +156,8 @@ theorem flow_flow_eq_add_integral_variationField (hf : IsBoundedC1System f U M L
     have hφ₂ : IntervalIntegrable (fun r ↦ f (x r) (ũ r)) volume a b := by
       rw [intervalIntegrable_iff_integrableOn_Icc_of_le hab]
       refine Integrable.of_bound ?_ M ?_
-      · exact nv_aestronglyMeasurable_comp_of_continuousOn (G := fun p : E × V ↦ f p.1 p.2)
-          (isClosed_univ.prod hf.isCompact.isClosed) hf.isC1On.continuousOn
+      · exact ContinuousOn.comp_aestronglyMeasurable_of_isClosed (G := fun p : E × V ↦ f p.1 p.2)
+          hf.isC1On.continuousOn (isClosed_univ.prod hf.isCompact.isClosed)
           ((hxcont.aestronglyMeasurable measurableSet_Icc).prodMk hũ.aestronglyMeasurable)
           ((ae_restrict_iff' measurableSet_Icc).2
             (Eventually.of_forall fun r hr ↦ ⟨mem_univ _, hũ.mem r hr⟩))
@@ -346,8 +346,9 @@ theorem adjoint_fderiv_flow (hf : IsBoundedC1System f U M L) (hũ : IsControlOn 
   have hcont : ContinuousOn (fun r ↦ flow f ũ s r x₀) (Icc a b) := by
     simpa [uIcc_of_le hab] using (isSolution_flow hL hũ hs x₀).1
   have hA : AEStronglyMeasurable A (volume.restrict (Icc a b)) :=
-    nv_aestronglyMeasurable_comp_of_continuousOn (G := fun p : E × V ↦ fderiv ℝ (f · p.2) p.1)
-      (isClosed_univ.prod hf.isCompact.isClosed) hf.isC1On.continuousOn_fderiv
+    ContinuousOn.comp_aestronglyMeasurable_of_isClosed
+      (G := fun p : E × V ↦ fderiv ℝ (f · p.2) p.1) hf.isC1On.continuousOn_fderiv
+      (isClosed_univ.prod hf.isCompact.isClosed)
       ((hcont.aestronglyMeasurable measurableSet_Icc).prodMk hũ.aestronglyMeasurable)
       ((ae_restrict_iff' measurableSet_Icc).2
         (Eventually.of_forall fun r hr ↦ ⟨mem_univ _, hũ.mem r hr⟩))

@@ -18,12 +18,10 @@ Pontryagin maximum principle of Agrachev–Sachkov (authors' draft, §12.2) uses
   proof of Theorem 12.1, p. 172: "this set has a hyperplane of support at the origin");
 * if the cone hull of a set is the whole space, so is the cone hull of a finite subset
   (`exists_finset_hull_eq_top`; A–S, proof of Lemma 12.2, p. 171: "We can choose vectors …
-  `i = 1, …, k`, that generate the whole tangent space as a positive convex cone"; also the step
-  that gives one separating covector for all needle variations in the proof of Theorem 12.4,
-  departure D9);
+  `i = 1, …, k`, that generate the whole tangent space as a positive convex cone");
 * a finite family whose cone hull is the whole space keeps this property under small
-  perturbations (`exists_forall_hull_eq_top_of_dist_lt`; A–S, p. 171: the vectors are moved to
-  distinct Lebesgue points).
+  perturbations (`exists_forall_hull_eq_top_of_dist_lt`; A–S, p. 171: a repeated needle time is
+  moved to a nearby Lebesgue point, which changes the needle vector little).
 
 ## Proof sketch
 

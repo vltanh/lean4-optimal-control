@@ -5,7 +5,6 @@ public import OptimalControl.Convex.Cone.Openness
 public import OptimalControl.Convex.Cone.Support
 public import OptimalControl.ODE.NeedleVariation
 import Mathlib.Analysis.Calculus.ContDiff.Basic
-import Mathlib.Analysis.Complex.Tietze
 
 /-!
 # The geometric maximum principle (Agrachev–Sachkov, §§12.1–12.2)
@@ -35,23 +34,24 @@ finite-dimensional real normed space `E` (departure D1):
 D1 open subset of `E` for the manifold `M`; D2 chronological calculus read pointwise
 (`g_{τ,u}(q₁)` through the resolvent of the variational equation, `needleVector`; Proposition
 11.3 as the adjoint equation, `ControlSystem.adjoint_stateTransition`); D3 `C¹` data; D4 `U`
-compact; D8 Lemma 12.1 on a cone with one-sided derivative; D9 one separating covector for all
-needle variations (finitely many generators suffice, `exists_finset_hull_eq_top`); D10 Brouwer's
-theorem from the FixedPoint package (A–S give no reference); D11 Carathéodory theory
+compact; D8 Lemma 12.1 on a cone with one-sided derivative; D9 one supporting covector for all
+needle variations at once (`exists_costate_of_boundary`, for Theorems 12.4 and 12.5); D10
+Brouwer's theorem from the FixedPoint package (A–S give no reference); D11 Carathéodory theory
 proved by Picard–Gronwall, with a cut-off near the reference trajectory. The hypothesis "boundary
 of the attainable set" is weakened to "not an interior point of the image of the local attainable
 set" (`localAttainableSet`), which is what the proof uses (it holds for every neighbourhood
 `O₀` in Lemma 12.1); this strengthens the theorems.
 
-Reading: `0 < t₁` in Lemma 12.2 and Theorem 12.1. A–S's literal Lemma 12.2 is false at
-`t₁ = 0`: for `M = ℝ`, `U = [-1, 1]`, `f(q, u) = u` and `ũ ≡ 0`, the needle vectors
-`g_{0,u}(q₀) = u` generate `ℝ`, but the attainable set at time `0` is `{q₀}`.
+`0 < t₁` is A–S's standing assumption ("Fix an arbitrary instant `t₁ > 0`", p. 163; also in
+Theorem 12.2 and in (12.19), (12.28), (12.51)); Lemma 12.2 and Theorem 12.1 carry it as a
+hypothesis. It is needed: for `M = ℝ`, `U = [-1, 1]`, `f(q, u) = u` and `ũ ≡ 0`, the needle
+vectors `g_{0,u}(q₀) = u` generate `ℝ`, but the attainable set at time `0` is `{q₀}`.
 
-Gap in A–S (proof of Lemma 12.2, p. 171): a needle time `τᵢ = t₁` (a Lebesgue point of `[0, t₁]`)
-gives no variation on `[0, t₁]`. Here every needle time is moved to a nearby Lebesgue point of
-the open interval `(0, t₁)`, distinct from the others, by the perturbation argument that A–S use
-for repeated times; positive generation survives small perturbations
-(`exists_forall_hull_eq_top_of_dist_lt`).
+Gap in A–S (proof of Lemma 12.2, p. 171): the set `T ⊆ [0, t₁]` of Lebesgue points may contain
+`t₁`, and a needle at `τᵢ = t₁` gives no variation on `[0, t₁]`. A–S move a repeated needle time to
+a nearby Lebesgue point (positive generation survives small perturbations,
+`exists_forall_hull_eq_top_of_dist_lt`); here a needle time equal to `t₁` is moved in the same way,
+to a Lebesgue point of `(0, t₁)` distinct from the other times.
 -/
 
 @[expose] public section
@@ -87,23 +87,9 @@ variable {E V : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensi
   [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V] [MeasurableSpace V]
   [BorelSpace V] {Ω : Set E} {U : Set V} {f : E → V → E} {t₁ : ℝ} {ũ : ℝ → V} {q : ℝ → E}
 
-omit [NormedSpace ℝ E] [FiniteDimensional ℝ E] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
-  [MeasurableSpace V] [BorelSpace V] in
-/-- A map continuous on a closed set `K ⊆ E × V`, composed with an a.e. strongly measurable curve
-with values in `K` almost everywhere, is a.e. strongly measurable (Tietze extension). -/
-private lemma aestronglyMeasurable_comp_of_continuousOn {W : Type*} [NormedAddCommGroup W]
-    [NormedSpace ℝ W] [FiniteDimensional ℝ W] {μ : Measure ℝ} {H : E × V → W}
-    {K : Set (E × V)} (hK : IsClosed K) (hH : ContinuousOn H K) {g : ℝ → E × V}
-    (hg : AEStronglyMeasurable g μ) (hgK : ∀ᵐ t ∂μ, g t ∈ K) :
-    AEStronglyMeasurable (fun t ↦ H (g t)) μ := by
-  obtain ⟨G, hG⟩ := ContinuousMap.exists_restrict_eq hK ⟨K.domRestrict H, hH.domRestrict⟩
-  refine (G.continuous.comp_aestronglyMeasurable hg).congr ?_
-  filter_upwards [hgK] with t ht
-  exact congrArg (fun F : C(K, W) ↦ F ⟨g t, ht⟩) hG
-
 /-- Along an admissible pair in `Ω`, the linearization `∂ₓf(q(t), ũ(t))` is a.e. strongly
 measurable and bounded on `[0, t₁]`. -/
-private lemma linearization_bound (hU : IsCompact U) (hf : IsC1On f Ω U)
+theorem linearization_bound (hU : IsCompact U) (hf : IsC1On f Ω U)
     (href : IsAdmissibleIn f Ω U (q 0) t₁ ũ q) :
     AEStronglyMeasurable (linearization f ũ q) (volume.restrict (Icc 0 t₁)) ∧
       ∃ K, ∀ t ∈ Icc 0 t₁, ‖linearization f ũ q t‖ ≤ K := by
@@ -117,7 +103,7 @@ private lemma linearization_bound (hU : IsCompact U) (hf : IsC1On f Ω U)
   refine ⟨?_, ?_⟩
   · have hg : AEStronglyMeasurable (fun t ↦ (q t, ũ t)) (volume.restrict (Icc 0 t₁)) :=
       (hqc.aestronglyMeasurable measurableSet_Icc).prodMk hũm.aestronglyMeasurable
-    refine aestronglyMeasurable_comp_of_continuousOn hKc.isClosed hH hg ?_
+    refine hH.comp_aestronglyMeasurable_of_isClosed hKc.isClosed hg ?_
     filter_upwards [ae_restrict_mem measurableSet_Icc] with t ht
     exact ⟨⟨t, ht, rfl⟩, hũU t ht⟩
   · obtain ⟨K, hK⟩ := hKc.exists_bound_of_continuousOn hH
@@ -212,25 +198,45 @@ private lemma measurable_needleControl (hũ : Measurable ũ) {k : ℕ} (τ : Fin
     ((MeasurableSet.iUnion fun j ↦ measurableSet_Ico).compl.inter (hũ hB))
   exact measurableSet_Ico.diff (MeasurableSet.biUnion (to_countable _) fun j _ ↦ measurableSet_Ico)
 
-/-- Distinct representatives: if each `C i` meets the complement of every finite set, one can
-choose `τ i ∈ C i` pairwise distinct. -/
-private lemma exists_injective_forall_mem {k : ℕ} (C : Fin k → Set ℝ)
-    (hC : ∀ i (S : Finset ℝ), ∃ x ∈ C i, x ∉ S) :
-    ∃ τ : Fin k → ℝ, Function.Injective τ ∧ ∀ i, τ i ∈ C i := by
+/-- Distinct needle times: the indices `i` with `keep i` keep their times `τ₀ i` (pairwise
+distinct among them), and every other index gets a point of `C i` outside a finite set `S₀`
+containing all the `τ₀ j`, the points being pairwise distinct; this is possible when each `C i`
+meets the complement of every finite set. -/
+private lemma exists_injective_keep {k : ℕ} (τ₀ : Fin k → ℝ) (keep : Fin k → Prop)
+    (hkeep : ∀ i j, keep i → keep j → τ₀ i = τ₀ j → i = j) (C : Fin k → Set ℝ)
+    (hC : ∀ i (S : Finset ℝ), ∃ x ∈ C i, x ∉ S) (S₀ : Finset ℝ) (hS₀ : ∀ i, τ₀ i ∈ S₀) :
+    ∃ τ : Fin k → ℝ, Function.Injective τ ∧
+      ∀ i, (keep i → τ i = τ₀ i) ∧ (¬ keep i → τ i ∈ C i ∧ τ i ∉ S₀) := by
   classical
   induction k with
   | zero => exact ⟨Fin.elim0, fun i ↦ i.elim0, fun i ↦ i.elim0⟩
   | succ k ih =>
-    obtain ⟨τ, hτinj, hτC⟩ := ih (fun i ↦ C i.castSucc) (fun i S ↦ hC _ S)
-    obtain ⟨x, hxC, hxS⟩ := hC (Fin.last k) (Finset.univ.image τ)
+    obtain ⟨τ, hτinj, hτ⟩ := ih (fun i ↦ τ₀ i.castSucc) (fun i ↦ keep i.castSucc)
+      (fun i j hi hj h ↦ Fin.castSucc_injective _ (hkeep _ _ hi hj h)) (fun i ↦ C i.castSucc)
+      (fun i S ↦ hC _ S) (fun i ↦ hS₀ _)
+    -- the time of the last index, distinct from the earlier ones
+    obtain ⟨x, hxl, hxS⟩ : ∃ x, ((keep (Fin.last k) → x = τ₀ (Fin.last k)) ∧
+        (¬ keep (Fin.last k) → x ∈ C (Fin.last k) ∧ x ∉ S₀)) ∧
+        x ∉ Finset.univ.image τ := by
+      by_cases hl : keep (Fin.last k)
+      · refine ⟨τ₀ (Fin.last k), ⟨fun _ ↦ rfl, fun h ↦ absurd hl h⟩, ?_⟩
+        simp only [Finset.mem_image, Finset.mem_univ, true_and, not_exists]
+        intro j hj
+        by_cases hkj : keep j.castSucc
+        · rw [(hτ j).1 hkj] at hj
+          exact (Fin.castSucc_lt_last j).ne (hkeep _ _ hkj hl hj)
+        · exact ((hτ j).2 hkj).2 (by rw [hj]; exact hS₀ _)
+      · obtain ⟨x, hxC, hx⟩ := hC (Fin.last k) (S₀ ∪ Finset.univ.image τ)
+        rw [Finset.mem_union, not_or] at hx
+        exact ⟨x, ⟨fun h ↦ absurd h hl, fun _ ↦ ⟨hxC, hx.1⟩⟩, hx.2⟩
     refine ⟨Fin.snoc (α := fun _ ↦ ℝ) τ x, Fin.snoc_injective_of_injective hτinj ?_, fun i ↦ ?_⟩
     · rintro ⟨j, rfl⟩
       exact hxS (Finset.mem_image_of_mem _ (Finset.mem_univ j))
     · induction i using Fin.lastCases with
-      | last => simpa using hxC
-      | cast j => simpa using hτC j
+      | last => simpa using hxl
+      | cast j => simpa using hτ j
 
-variable {P Q : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P]
+variable {P Q : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
   [NormedAddCommGroup Q] [NormedSpace ℝ Q] [FiniteDimensional ℝ Q] {ψ : P → E} {a₀ : P}
   {Φ : E → Q}
 
@@ -243,8 +249,9 @@ point, A–S's `∂F/∂q`, (2.19)) and `Φ'(g_{τ,u}(q₁))` (needle variations
 under `Φ` of the local attainable set.
 
 Proof (A–S's proof of Lemma 12.2, with the changes of the proof of Theorem 12.4 (2)): by
-`exists_finset_hull_eq_top`, finitely many of the vectors generate (D9); move the needle times to
-distinct Lebesgue points of `(0, t₁)` keeping the generation
+`exists_finset_hull_eq_top`, finitely many of the vectors generate; a needle time that repeats an
+earlier one (A–S) or equals `t₁` (gap in A–S, see the module docstring) is moved to a nearby
+Lebesgue point of `(0, t₁)` distinct from the other times, keeping the generation
 (`IsLebesguePointWithin.exists_near`, the continuity of `τ ↦ g_{τ,u}(q₁)` at Lebesgue points
 along points where `ũ` is close to `ũ(τ)`, and `exists_forall_hull_eq_top_of_dist_lt`); cut the
 system off near `q` (`IsC1On.exists_cutoff`, D11), so that the needle end-point map
@@ -278,7 +285,7 @@ theorem lemma12_2_local (hΩ : IsOpen Ω) (hU : IsCompact U) (hf : IsC1On f Ω U
   have h0I : (0 : ℝ) ∈ Icc 0 t₁ := ⟨le_rfl, ht₁.le⟩
   obtain ⟨hAm, KA, hKA⟩ := linearization_bound hU hf href
   /- Step 1 (A–S: "We can choose vectors `g_{τᵢ,uᵢ}(q₁)` … that generate the whole tangent
-  space as a positive convex cone"): finitely many of the vectors generate (D9). -/
+  space as a positive convex cone"): finitely many of the vectors generate. -/
   obtain ⟨s, hsS, hs⟩ := exists_finset_hull_eq_top hcone
   set sN := s.filter (· ∉ Lin) with hsN
   let e : Fin sN.card ≃ sN := sN.equivFin.symm
@@ -302,8 +309,9 @@ theorem lemma12_2_local (hΩ : IsOpen Ω) (hU : IsCompact U) (hf : IsC1On f Ω U
         exact ⟨s.equivFin ⟨x, hx⟩, by simp [v]⟩
     rw [this, hs]
   obtain ⟨η, hη, hηv⟩ := exists_forall_hull_eq_top_of_dist_lt hv
-  /- Step 2 (A–S, p. 171): the needle times can be taken distinct, at Lebesgue points close to the
-  given ones, keeping the needle vectors close. -/
+  /- Step 2 (A–S, p. 171: "we can choose points `τᵢ` distinct"): a needle time that repeats an
+  earlier one is moved to a nearby Lebesgue point, keeping the needle vector close; so is a needle
+  time equal to `t₁` (gap in A–S: a needle at `t₁` gives no variation on `[0, t₁]`). -/
   have hnear : ∀ τ₁ : ℝ, (τ₁ ∈ Icc 0 t₁ ∧ IsLebesguePointWithin ũ (Icc 0 t₁) τ₁) →
       ∀ w₁ ∈ U, ∀ S : Finset ℝ, ∃ t ∈ {t | t ∈ Ioo 0 t₁ ∧
         IsLebesguePointWithin ũ (Icc 0 t₁) t ∧
@@ -342,7 +350,26 @@ theorem lemma12_2_local (hΩ : IsOpen Ω) (hU : IsCompact U) (hf : IsC1On f Ω U
       (by rw [Prod.dist_eq]; exact max_lt (by rwa [Real.dist_eq]) (by rwa [dist_eq_norm]))
     rw [dist_eq_norm] at this
     simpa [needleVector, R] using this
-  obtain ⟨τ, hτinj, hτC⟩ := exists_injective_forall_mem _ fun i S ↦ hnear _ (hτ₀ i) _ (hw i) S
+  have hkeep : ∀ i j, (τ₀ i ≠ t₁ ∧ ∀ l < i, τ₀ l ≠ τ₀ i) → (τ₀ j ≠ t₁ ∧ ∀ l < j, τ₀ l ≠ τ₀ j) →
+      τ₀ i = τ₀ j → i = j := by
+    intro i j hi hj hij
+    rcases lt_trichotomy i j with h | h | h
+    · exact absurd hij (hj.2 i h)
+    · exact h
+    · exact absurd hij.symm (hi.2 j h)
+  obtain ⟨τ, hτinj, hτkeep⟩ := exists_injective_keep τ₀ _ hkeep
+    (fun i ↦ {t | t ∈ Ioo 0 t₁ ∧ IsLebesguePointWithin ũ (Icc 0 t₁) t ∧
+      ‖Φ' (needleVector f ũ q t₁ t (w i)) - Φ' (needleVector f ũ q t₁ (τ₀ i) (w i))‖ < η})
+    (fun i S ↦ hnear _ (hτ₀ i) _ (hw i) S) (Finset.univ.image τ₀)
+    (fun i ↦ Finset.mem_image_of_mem _ (Finset.mem_univ i))
+  have hτP : ∀ i, τ i ∈ Ico 0 t₁ ∧ IsLebesguePointWithin ũ (Icc 0 t₁) (τ i) ∧
+      ‖Φ' (needleVector f ũ q t₁ (τ i) (w i)) - Φ' (needleVector f ũ q t₁ (τ₀ i) (w i))‖ < η := by
+    intro i
+    by_cases hk : τ₀ i ≠ t₁ ∧ ∀ l < i, τ₀ l ≠ τ₀ i
+    · rw [(hτkeep i).1 hk, sub_self, norm_zero]
+      exact ⟨⟨(hτ₀ i).1.1, lt_of_le_of_ne (hτ₀ i).1.2 hk.1⟩, (hτ₀ i).2, hη⟩
+    · obtain ⟨⟨hI, hL, hc⟩, -⟩ := (hτkeep i).2 hk
+      exact ⟨⟨hI.1.le, hI.2⟩, hL, hc⟩
   set gN : Fin sN.card → Q := fun i ↦ Φ' (needleVector f ũ q t₁ (τ i) (w i)) with hgN
   have hgen : PointedCone.hull ℝ (Lin ∪ range gN) = ⊤ := by
     let v' : Fin s.card → Q := fun j ↦ if h : v j ∈ sN then gN (e.symm ⟨v j, h⟩) else v j
@@ -350,7 +377,7 @@ theorem lemma12_2_local (hΩ : IsOpen Ω) (hU : IsCompact U) (hf : IsC1On f Ω U
       intro j
       by_cases h : v j ∈ sN
       · have hej : (e (e.symm ⟨v j, h⟩) : Q) = v j := by simp
-        have := (hτC (e.symm ⟨v j, h⟩)).2.2
+        have := (hτP (e.symm ⟨v j, h⟩)).2.2
         rw [hτ₀w, hej] at this
         simpa [v', h] using this
       · simpa [v', h] using hη
@@ -414,8 +441,8 @@ theorem lemma12_2_local (hΩ : IsOpen Ω) (hU : IsCompact U) (hf : IsC1On f Ω U
     rfl
   /- Step 4: the needle-like variations (12.14) and the end-point map `F(a, σ)`, Lipschitz and
   differentiable at `(a₀, 0)` within the cone `P × ℝᵏ₊`. -/
-  have hτI : ∀ i, τ i ∈ Ico 0 t₁ := fun i ↦ ⟨(hτC i).1.1.le, (hτC i).1.2⟩
-  have hleb : ∀ i, IsLebesguePointWithin ũ (Icc 0 t₁) (τ i) := fun i ↦ (hτC i).2.1
+  have hτI : ∀ i, τ i ∈ Ico 0 t₁ := fun i ↦ (hτP i).1
+  have hleb : ∀ i, IsLebesguePointWithin ũ (Icc 0 t₁) (τ i) := fun i ↦ (hτP i).2.1
   set N : P × (Fin sN.card → ℝ) → E := fun p ↦ flow g (needleControl ũ τ w p.2) 0 t₁ (ψ p.1)
     with hNdef
   have hN0 : N (a₀, 0) = q t₁ := by simp [hNdef, needleControl_zero, hψ0, hqflow t₁ ht₁I]
@@ -470,7 +497,7 @@ theorem lemma12_2_local (hΩ : IsOpen Ω) (hU : IsCompact U) (hf : IsC1On f Ω U
     obtain ⟨ρ₁, hρ₁, KN, hKN⟩ := lipschitzOnWith_needle (τ := τ) hg ht₁ hũc hw hψ
     obtain ⟨KΦ, T, hT, hKΦ⟩ := hΦ.exists_lipschitzOnWith
     obtain ⟨r₁, hr₁, hr₁T⟩ := Metric.mem_nhds_iff.1 hT
-    obtain ⟨ρ₂, hρ₂, hρ₂N⟩ := norm_needle_trajectory_sub_lt (τ := τ) hg ht₁ hũc hw
+    obtain ⟨ρ₂, hρ₂, hρ₂N⟩ := norm_needle_trajectory_sub_lt (τ := τ) hg hũc hw
       hψ.continuousAt hr₁
     refine ⟨min ρ₁ ρ₂, lt_min hρ₁ hρ₂, KΦ * KN, LipschitzOnWith.of_dist_le_mul ?_⟩
     have hmem : ∀ p ∈ C ∩ ball 0 (min ρ₁ ρ₂), c₀ + p ∈ C ∩ ball c₀ ρ₁ ∧
@@ -520,7 +547,7 @@ theorem lemma12_2_local (hΩ : IsOpen Ω) (hU : IsCompact U) (hf : IsC1On f Ω U
   admissible for the original system and near the reference. -/
   have hint := HasFDerivWithinAt.zero_mem_interior_image_inter_cone hFm hCconv hCcone hFm0
     hlipFm hsurj
-  obtain ⟨ρ₃, hρ₃, hρ₃N⟩ := norm_needle_trajectory_sub_lt (τ := τ) hg ht₁ hũc hw
+  obtain ⟨ρ₃, hρ₃, hρ₃N⟩ := norm_needle_trajectory_sub_lt (τ := τ) hg hũc hw
     hψ.continuousAt (lt_min hε hδ)
   have h1 := hint _ (ball_mem_nhds (0 : P × (Fin sN.card → ℝ)) (lt_min hε hρ₃))
   have hsub : Fm '' (ball 0 (min ε ρ₃) ∩ C) ⊆
@@ -575,7 +602,7 @@ Lebesgue points of the reference control `ũ`; if
 is the end point of the reference trajectory `q` (A–S's `q̃`) from `q₀ = q(0)`, and
 `g_{τ,u}(q₁)` is `needleVector f ũ q t₁ τ u` (12.12).
 
-Reading: `0 < t₁` (A–S's literal statement is false at `t₁ = 0`, see the module docstring).
+`0 < t₁` is A–S's standing assumption (p. 163; see the module docstring).
 
 Proof: the case `ψ` constant, `Φ = id` of `lemma12_2_local` (A–S's proof). -/
 theorem lemma12_2 (hΩ : IsOpen Ω) (hU : IsCompact U) (hf : IsC1On f Ω U) (ht₁ : 0 < t₁)
@@ -610,7 +637,9 @@ for almost every `t`, and `p(0) ∘ ψ'(a₀) = 0` (`λ₀ ⊥ T_{q̃(0)}N₀`, 
 
 Proof (A–S): by `lemma12_2_local`, the cone of the vectors `Φ'(R(0, t₁)ψ'(a₀)α)` and
 `Φ'(g_{τ,u}(q₁))` is not the whole space; a supporting covector `ξ ≠ 0`
-(`exists_dual_ne_zero_nonpos_of_ne_top`) is `≤ 0` on it, hence `= 0` on the linear part.
+(`exists_dual_ne_zero_nonpos_of_ne_top`) is `≤ 0` on it, hence `= 0` on the linear part. This is
+one covector for all needle variations at once, where A–S's (12.41) gives one for each finite
+needle variation; the maximality condition needs a single one (departure D9).
 Put `p(t) = ξ ∘ Φ' ∘ R(t, t₁)` (A–S's `λ_t = (P^{t₁}_t)^* λ_{t₁}`); Proposition 11.3, read
 pointwise, is `ControlSystem.adjoint_stateTransition`, which also gives Lipschitz continuity and
 `p(t) ≠ 0` (`ξ ∘ Φ' ≠ 0` since `Φ'` is onto); `⟨p(τ), f(q(τ), u) - f(q(τ), ũ(τ))⟩ ≤ 0` at
@@ -628,7 +657,8 @@ theorem exists_costate_of_boundary (hΩ : IsOpen Ω) (hU : IsCompact U) (hf : Is
   obtain ⟨ε, hε, hεbd⟩ := hbd
   set Φ' := fderiv ℝ Φ (q t₁)
   set R := stateTransition (linearization f ũ q)
-  -- by Lemma 12.2, the cone of the variations is not the whole space (D9 is inside Lemma 12.2)
+  -- by Lemma 12.2, the cone of all the variations is not the whole space, so one covector
+  -- supports it (D9)
   have hne : PointedCone.hull ℝ
       (range (fun α : P ↦ Φ' (R 0 t₁ (fderiv ℝ ψ a₀ α))) ∪
         (fun p : ℝ × V ↦ Φ' (needleVector f ũ q t₁ p.1 p.2)) ''
@@ -670,7 +700,7 @@ Cauchy problem (12.1), (12.2). If `q̃(t₁) ∈ ∂A_{q₀}(t₁)`, then there 
 In coordinates on `Ω ⊆ E` (D1): `q` is the reference trajectory (A–S's `q̃`) from `q(0) = q₀`;
 the curve `p` (A–S's `λ_t`) is a Lipschitz curve in `E*`, (12.4) is the adjoint equation
 `ṗ = -p ∘ ∂ₓf(q, ũ)` (`IsAdjoint` with `φ = 0`), (12.5) is `IsMaximal`; (12.3) is stated for
-every `t`. Reading: `0 < t₁` (see the module docstring).
+every `t`. `0 < t₁` is A–S's standing assumption (p. 163).
 
 Proof (A–S, p. 172): Lemma 12.2 (`lemma12_2`) shows that the cone of needle vectors is not
 the whole space; a supporting covector `λ_{t₁} ≠ 0` (`exists_dual_ne_zero_nonpos_of_ne_top`);

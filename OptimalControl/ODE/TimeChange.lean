@@ -31,7 +31,10 @@ replaced by compact intervals (departure D4).
 (through the order isomorphism `[0, t₁] ≃o [0, θ(t₁)]`, `ControlSystem.TimeChange.exists_inverse`);
 `u ∘ θ⁻¹` is measurable. The push-forward of `v · Leb|[0, T]` under `θ` is `Leb|[0, θ(T)]` (both
 give `min(a, θ(T))` to `(-∞, a]`, `a ≥ 0`, by the intermediate value theorem), which is the change
-of variables in both the integral equation and the cost.
+of variables in both the integral equation and the cost. The substitution formula is proved
+through this push-forward of measures because `θ' = v` holds only almost everywhere (A–S's
+controls, hence `v`, are only measurable), while Mathlib's change-of-variables lemmas need a
+derivative at every point of the interval.
 -/
 
 @[expose] public section

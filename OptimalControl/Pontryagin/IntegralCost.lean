@@ -209,24 +209,13 @@ variable {E V : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensi
   [BorelSpace V] {Ω : Set E} {U : Set V} {f : E → V → E} {φ : E → V → ℝ} {T : ℝ} {ũ : ℝ → V}
   {q : ℝ → E}
 
-/-- Along an admissible pair in `Ω`, the linearization `∂ₓf(q(t), ũ(t))` is a.e.-strongly
-measurable and bounded on `[0, T]`. -/
-theorem linearization_bound (hU : IsCompact U) (hf : IsC1On f Ω U) (hT : 0 ≤ T)
-    (href : IsAdmissibleIn f Ω U (q 0) T ũ q) :
-    AEStronglyMeasurable (linearization f ũ q) (volume.restrict (Icc 0 T)) ∧
-      ∃ K, ∀ t ∈ Icc 0 T, ‖linearization f ũ q t‖ ≤ K := by
-  obtain ⟨h1, ⟨K, hK⟩, -⟩ := TimeChange.integrand_bound (g := fun x u ↦ fderiv ℝ (f · u) x) hU
-    hf.continuousOn_fderiv hT href.1.2.2.1 href.1.1.aemeasurable
-    (fun t ht ↦ ⟨href.2 t ht, href.1.2.1 t ht⟩)
-  exact ⟨h1, K, hK⟩
-
 /-- **Uniqueness for the adjoint equation** with `ν = 0`: a continuous solution vanishing at one
 time vanishes on `[0, T]` (`ControlSystem.eq_comp_stateTransition_of_adjoint`). -/
 theorem eq_zero_of_adjoint (hU : IsCompact U) (hf : IsC1On f Ω U) (hT : 0 ≤ T)
     (href : IsAdmissibleIn f Ω U (q 0) T ũ q) {p : ℝ → StrongDual ℝ E}
     (hp : ContinuousOn p (Icc 0 T)) (hadj : IsAdjoint f φ 0 ũ q T p) {t₀ : ℝ}
     (ht₀ : t₀ ∈ Icc 0 T) (h0 : p t₀ = 0) : ∀ t ∈ Icc 0 T, p t = 0 := by
-  obtain ⟨hA, K, hK⟩ := linearization_bound hU hf hT href
+  obtain ⟨hA, K, hK⟩ := linearization_bound hU hf href
   obtain ⟨hint, heq⟩ := hadj
   simp only [zero_smul, add_zero] at hint heq
   have hi : ∀ a ∈ Icc 0 T, ∀ b ∈ Icc 0 T,
@@ -494,7 +483,6 @@ theorem controlHamiltonian_doubled (ν : ℝ) (p : StrongDual ℝ (E × E)) (z :
   simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.inl_apply, add_left_inj]
   exact add_eq_right.2 (map_zero p)
 
-
 omit [FiniteDimensional ℝ E] [NormedSpace ℝ V] [FiniteDimensional ℝ V] [BorelSpace V] in
 /-- **From the costate of the cost-extended system to the conclusions of Theorem 12.3** (A–S,
 p. 176): for a costate `λ̂ = (ν, λ)` of the cost-extended system with `v ∈ [0, 1]` along the
@@ -593,7 +581,7 @@ theorem theorem12_3 (hΩ : IsOpen Ω) (hU : IsCompact U) (hf : IsC1On f Ω U) (h
     Reduction.costExt_costate hf hφ ht₁ href hpL hp0 hpadj hpmax
   exact ⟨_, _, hL, hne, hadj, hmax, hν⟩
 
-variable {P Q : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P]
+variable {P Q : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
   [NormedAddCommGroup Q] [NormedSpace ℝ Q] [FiniteDimensional ℝ Q]
 
 /-- **Agrachev–Sachkov, Theorem 12.4** (authors' draft, p. 178): let `ũ(t)`, `t ∈ [0, t₁]`, be an
@@ -606,14 +594,20 @@ optimal control in problem (12.26)–(12.29) (`q(0) ∈ N₀`, `q(t₁) ∈ N₁
 In coordinates, `N₀` near `q(0)` through a `C¹` parametrization `ψ` (`ψ(a₀) = q(0)`, `ψ(a) ∈ N₀`
 for `a` near `a₀`), `N₁` near `q(t₁)` through a `C¹` submersion `Φ` (`Φ(q(t₁)) = 0`,
 `Φ⁻¹(0) ⊆ N₁` near `q(t₁)`); (12.34) reads `λ₀ ∘ ψ'(a₀) = 0` and `λ_{t₁} = 0` on `ker Φ'`.
+The hypotheses `q(0) ∈ N₀` and `q(t₁) ∈ N₁` (`_hq₀`, `_hq₁`; the reference trajectory satisfies
+the boundary conditions (12.27) of the problem) are A–S's, but the proof does not use them: they
+follow from the hypotheses on `ψ` and `Φ`.
 
 Proof (A–S, pp. 179–182): the cost-extended system `ẏ = φ + v`, `q̇ = f_u(q)`, `v ∈ [0, 1]`; with
 `ψ̂(a) = (0, ψ(a))` and `Φ̂(y, q) = (y, Φ(q))`, optimality gives (12.37)/(12.45), and
 `exists_costate_of_boundary` gives `λ̂_{t₁} = Φ̂^* ξ̂ = (ν, λ_{t₁})` (12.44), hence
-`λ_{t₁} = Φ^* ξ ⊥ ker Φ'`, and `λ₀ ∘ ψ' = 0` (12.47)–(12.48); the rest as in Theorem 12.3. -/
+`λ_{t₁} = Φ^* ξ ⊥ ker Φ'`, and `λ₀ ∘ ψ' = 0` (12.47)–(12.48); the rest as in Theorem 12.3.
+Departure D9: the covector `ξ̂` supports the cone of all the variations at once, where (12.41)
+takes one for each finite needle variation; a single covector is needed for the maximality
+condition at almost every `t`. -/
 theorem theorem12_4 (hΩ : IsOpen Ω) (hU : IsCompact U) (hf : IsC1On f Ω U) (hφ : IsC1On φ Ω U)
     (ht₁ : 0 < t₁) {N₀ N₁ : Set E} (href : IsAdmissibleIn f Ω U (q 0) t₁ ũ q)
-    (hq₀ : q 0 ∈ N₀) (hq₁ : q t₁ ∈ N₁)
+    (_hq₀ : q 0 ∈ N₀) (_hq₁ : q t₁ ∈ N₁)
     (hopt : ∀ (u : ℝ → V) (x : ℝ → E), IsAdmissibleIn f Ω U (x 0) t₁ u x → x 0 ∈ N₀ →
       x t₁ ∈ N₁ → cost φ t₁ ũ q ≤ cost φ t₁ u x)
     {ψ : P → E} {a₀ : P} (hψ : ContDiffAt ℝ 1 ψ a₀) (hψ0 : ψ a₀ = q 0)
@@ -624,8 +618,6 @@ theorem theorem12_4 (hΩ : IsOpen Ω) (hU : IsCompact U) (hf : IsC1On f Ω U) (h
       IsAdjoint f φ ν ũ q t₁ p ∧ IsMaximal f φ ν U ũ q t₁ p ∧
       (∀ t ∈ Icc 0 t₁, (p t, ν) ≠ 0) ∧ ν ≤ 0 ∧
       (p 0).comp (fderiv ℝ ψ a₀) = 0 ∧ ∀ w, fderiv ℝ Φ (q t₁) w = 0 → p t₁ w = 0 := by
-  -- `q(0) ∈ N₀` and `q(t₁) ∈ N₁` also follow from the hypotheses on `ψ` and `Φ`; not used
-  have _h : q 0 ∈ N₀ ∧ q t₁ ∈ N₁ := ⟨hq₀, hq₁⟩
   have hT := ht₁.le
   have hext := Reduction.isAdmissibleIn_costExt hU hφ hT href (C := Icc 0 1) ⟨le_rfl, zero_le_one⟩
   have h0 : (fun t ↦ (∫ r in (0 : ℝ)..t, φ (q r) (ũ r), q t)) 0 = ((0 : ℝ), q 0) := by simp
@@ -728,7 +720,8 @@ Proof (A–S, pp. 183–184): the auxiliary problem on `M × M`, `ẋ = 0`, `q̇
 and `Φ = G`) gives the costate `(η, λ)` with `η̇ = 0`, `η + λ₀ = 0` at `t = 0`, and
 `(η_{t₁}, λ_{t₁}) = (-λ₀, λ_{t₁}) ⊥ T N` at `t = t₁`. The pointwise `(λ_t, ν) ≠ 0` comes from
 `(η, λ_t, ν) ≠ 0` and the uniqueness for the adjoint equation (if `λ_t = 0 = ν`, then `λ ≡ 0`
-and `η = -λ₀ = 0`). -/
+and `η = -λ₀ = 0`). As in Theorem 12.4, one covector supports all the needle variations at once
+(departure D9). -/
 theorem theorem12_5 (hΩ : IsOpen Ω) (hU : IsCompact U) (hf : IsC1On f Ω U) (hφ : IsC1On φ Ω U)
     (ht₁ : 0 < t₁) {N : Set (E × E)} (href : IsAdmissibleIn f Ω U (q 0) t₁ ũ q)
     (hqN : (q 0, q t₁) ∈ N)

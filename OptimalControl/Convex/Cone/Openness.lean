@@ -5,6 +5,9 @@ public import Mathlib.Analysis.Normed.Module.FiniteDimension
 public import Mathlib.Topology.EMetricSpace.Lipschitz
 -- Brouwer's fixed-point theorem, for the proof (A–S use it in the proof of Lemma 12.1).
 import FixedPoint.Brouwer.Convex
+-- Equicontinuity and pointwise convergence give uniform convergence (Ascoli).
+import Mathlib.Topology.MetricSpace.UniformConvergence
+import Mathlib.Topology.UniformSpace.Ascoli
 
 /-!
 # Openness at the vertex of a cone (Agrachev–Sachkov's Lemma 12.1)
@@ -26,29 +29,30 @@ Reading (departure D8): the lemma is stated in the form of Remark (1), for any c
 is the form used (the needle map is defined only on `ℝᵏ₊`, and on `N₀ × ℝᵏ₊` in the proof of
 Theorem 12.4 (2)): `F` is Lipschitz only on `C ∩ B(0, ρ)` and differentiable at `0` within `C`.
 
-Gap in A–S: the proof picks points of `int C`, which is empty for a cone with empty interior
-(Remark (1) allows any convex cone). For such cones read `int` as the interior relative to
-`span C`: the points `v + w` used below are combinations of the `vᵢ ∈ C` with positive
-coefficients, so they lie in `C` whether or not `C` has interior points.
+Gap in A–S (Remark (1)): the proof takes the preimages `vᵢ` in `int C` and a ball `B_δ ⊆ W` with
+`v + B_δ ⊆ int C`; a convex cone may have empty interior, and then these points do not exist.
+Departure, which repairs Remark (1) for such cones: the `vᵢ` are only taken in `C`, and the points
+used are `v + L z`, `z` in a small ball `B` of the target, which are combinations of the `vᵢ` with
+positive coefficients and so lie in `C`; the proof uses no interior, relative or not. For the cones
+to which the lemma is applied, `ℝᵏ₊` and `P × ℝᵏ₊`, which have interior points, A–S's step is
+valid as written.
 
 ## Proof (A–S's)
 
 Choose `y₀, …, yₙ` spanning a simplex centred at `0` (here `yⱼ₊₁ = eⱼ` for a basis `e` of the
 target and `y₀ = -Σ eⱼ`) and `vᵢ ∈ C` with `F'vᵢ = yᵢ`; `v = mean(vᵢ)` has `F'v = 0`, the span
 `W` of the `vᵢ - v` is `n`-dimensional and `F' : W → ℝⁿ` is invertible, with inverse
-`L(eⱼ) = vⱼ₊₁ - v`. A ball `B` around `0` in the target with `v + L(B) ⊆ C` plays the role of
-A–S's `G₀(B_δ)`: `v + L(z)` is a combination of the `vᵢ` with coefficients near `1/(n+1)`. The
-maps `G_α(z) = α⁻¹F(α(v + L z))` tend to `G₀ = id` uniformly on `B` (12.11). For `x̃` small,
-`Id - G_α + x̃` maps the compact convex set `B` into itself; **Brouwer's fixed point theorem**
-gives `G_α(z) = x̃`. Hence `0 ∈ int F(α(v + L(B)))` for small `α > 0`. Brouwer's theorem is the
-only topological input of the whole proof of the maximum principle; it comes from the
-FixedPoint package, `Brouwer.exists_fixedPoint` (no source is given by A–S; departure D10).
-
-Departure from the source (D8): the uniform convergence `G_α → G₀` is read off (12.11) directly,
-since `F(x) = F'x + o(‖x‖)` within `C` and `‖α(v + L z)‖ ≤ α (‖v‖ + ‖L‖ r)` on `B`, so the `o(1)`
-of (12.11) is uniform in `z`; A–S derive it from pointwise convergence and the equicontinuity of
-the `G_α` (a common Lipschitz constant). The Lipschitz hypothesis is used for the continuity of
-`G_α`, which Brouwer's theorem needs.
+`L(eⱼ) = vⱼ₊₁ - v`. The set `L(B) ⊆ W` plays the role of A–S's ball `B_δ`, and `B = G₀(L(B))`
+that of `G₀(B_δ)`, where `G_α(w) = α⁻¹F(α(v + w))` and `G₀ = F'`. The maps
+`G_α ∘ G₀⁻¹ : z ↦ α⁻¹F(α(v + L z))` on `B`, `0 < α < α₀`, are Lipschitz with a common constant
+(`F` is Lipschitz near `0` on `C`), hence equicontinuous, and tend to the identity pointwise by
+(12.11) (`HasFDerivWithinAt.lim`), hence uniformly on the compact set `B` (Mathlib's
+`Equicontinuous.tendsto_uniformFun_iff_pi`). For `x̃` small, `Id - G_α ∘ G₀⁻¹ + x̃` maps the
+compact convex set `B` into itself; **Brouwer's fixed point theorem** gives
+`G_α ∘ G₀⁻¹(z) = x̃`. Hence
+`0 ∈ int F(α(v + L(B)))` for small `α > 0`. Brouwer's theorem is the only topological input of
+the whole proof of the maximum principle; it comes from the FixedPoint package,
+`Brouwer.exists_fixedPoint` (no source is given by A–S; departure D10).
 -/
 
 @[expose] public section
@@ -149,15 +153,6 @@ theorem HasFDerivWithinAt.zero_mem_interior_image_inter_cone {C : Set E} {Fm : E
     have h1 : 1 / (2 * m) ≤ (1 - S) / m := by
       rw [div_le_div_iff₀ (by positivity) hm0]; nlinarith
     linarith [neg_abs_le (η j), hη j]
-  -- (12.11) uniformly on the ball: `F(x) = F'x + o(x)` within `C`
-  have hlo : ∀ ε > 0, ∃ δ > 0, ∀ x ∈ C, ‖x‖ < δ → ‖Fm x - Fm' x‖ ≤ ε * ‖x‖ := by
-    intro ε hε
-    have h := hFm.isLittleO.def hε
-    rw [eventually_nhdsWithin_iff, Metric.eventually_nhds_iff] at h
-    obtain ⟨δ, hδ, h⟩ := h
-    refine ⟨δ, hδ, fun x hx hxδ ↦ ?_⟩
-    have := h (by simpa using hxδ) hx
-    simpa [h0] using this
   obtain ⟨ρ, hρ, Kl, hKl⟩ := hlip
   obtain ⟨εO, hεO, hεOO⟩ := Metric.mem_nhds_iff.1 hO
   set R := ‖v‖ + ‖L‖ * r with hR
@@ -168,71 +163,113 @@ theorem HasFDerivWithinAt.zero_mem_interior_image_inter_cone {C : Set E} {Fm : E
       _ ≤ ‖v‖ + ‖L‖ * r := by
           gcongr
           exact (L.le_opNorm z).trans (by gcongr; exact mem_closedBall_zero_iff.1 hz)
-  obtain ⟨δ, hδ, hδlo⟩ := hlo (r / (2 * (R + 1))) (by positivity)
-  set α := min δ (min ρ εO) / (2 * (R + 1)) with hα
-  have hα0 : 0 < α := by positivity
-  -- the points `α (v + L z)`, `z ∈ B`, lie in `O ∩ C ∩ B(0, ρ)` and have norm `< δ`
-  have hxbd : ∀ z ∈ closedBall (0 : F) r, ‖α • (v + L z)‖ < min δ (min ρ εO) := by
+  -- for `0 < α < α₀`, the points `α (v + L z)`, `z ∈ B`, lie in `O ∩ C ∩ B(0, ρ)`
+  set α₀ := min ρ εO / (R + 1) with hα₀
+  have hα₀0 : 0 < α₀ := by positivity
+  have hxbd : ∀ α ∈ Ioo 0 α₀, ∀ z ∈ closedBall (0 : F) r, ‖α • (v + L z)‖ < min ρ εO := by
+    intro α hα z hz
+    rw [norm_smul, Real.norm_of_nonneg hα.1.le]
+    calc α * ‖v + L z‖ ≤ α₀ * R := mul_le_mul hα.2.le (hvLz z hz) (norm_nonneg _) hα₀0.le
+      _ < α₀ * (R + 1) := mul_lt_mul_of_pos_left (by linarith) hα₀0
+      _ = min ρ εO := by rw [hα₀]; field_simp
+  have hxC : ∀ α : ℝ, 0 ≤ α → ∀ z ∈ closedBall (0 : F) r, α • (v + L z) ∈ C :=
+    fun α hα z hz ↦ hCcone _ (hrC z hz) α hα
+  have hxρ : ∀ α ∈ Ioo 0 α₀, ∀ z ∈ closedBall (0 : F) r, α • (v + L z) ∈ C ∩ ball 0 ρ :=
+    fun α hα z hz ↦ ⟨hxC α hα.1.le z hz,
+      mem_ball_zero_iff.2 ((hxbd α hα z hz).trans_le (min_le_left _ _))⟩
+  -- A–S's maps `G_α ∘ G₀⁻¹ : z ↦ α⁻¹ F(α(v + L z))` on the compact ball `B`, `0 < α < α₀`
+  let B := closedBall (0 : F) r
+  have : CompactSpace B := isCompact_iff_compactSpace.1 (isCompact_closedBall 0 r)
+  let G : Ioo (0 : ℝ) α₀ → B → F := fun α z ↦ (α : ℝ)⁻¹ • Fm ((α : ℝ) • (v + L z))
+  -- (A–S) "Since the mapping `F` is Lipschitzian, all mappings `G_α` are Lipschitzian with a
+  -- common constant. Thus the family `G_α` is equicontinuous."
+  have hGlip : ∀ α, LipschitzWith (Kl * ‖L‖₊) (G α) := by
+    intro α
+    have hα0 : 0 < (α : ℝ) := α.2.1
+    refine LipschitzWith.of_dist_le_mul fun z z' ↦ ?_
+    calc dist (G α z) (G α z')
+        = (α : ℝ)⁻¹ * dist (Fm ((α : ℝ) • (v + L z))) (Fm ((α : ℝ) • (v + L z'))) := by
+          simp only [G, dist_smul₀, norm_inv, Real.norm_of_nonneg hα0.le]
+      _ ≤ (α : ℝ)⁻¹ * (Kl * dist ((α : ℝ) • (v + L z)) ((α : ℝ) • (v + L z'))) :=
+          mul_le_mul_of_nonneg_left
+            (hKl.dist_le_mul _ (hxρ α α.2 z z.2) _ (hxρ α α.2 z' z'.2)) (inv_nonneg.2 hα0.le)
+      _ = Kl * ‖L ((z : F) - z')‖ := by
+          rw [dist_smul₀, Real.norm_of_nonneg hα0.le, dist_eq_norm, add_sub_add_left_eq_sub,
+            ← map_sub]
+          field_simp
+      _ ≤ Kl * (‖L‖ * dist z z') := by
+          gcongr
+          rw [Subtype.dist_eq, dist_eq_norm]
+          exact L.le_opNorm _
+      _ = ↑(Kl * ‖L‖₊) * dist z z' := by push_cast; ring
+  have hGeq : Equicontinuous G := (LipschitzWith.uniformEquicontinuous G _ hGlip).equicontinuous
+  -- the limit `α → 0+`
+  let ℱ : Filter (Ioo (0 : ℝ) α₀) := comap Subtype.val (𝓝[>] 0)
+  have : ℱ.NeBot := NeBot.comap_of_range_mem inferInstance
+    (by rw [Subtype.range_coe]; exact Ioo_mem_nhdsGT hα₀0)
+  -- (12.11): `α⁻¹ F(α(v + L z)) = F'₀(v + L z) + o(1) = z` as `α → 0+`, for every `z`
+  have hpt : Tendsto G ℱ (𝓝 fun z : B ↦ (z : F)) := by
+    rw [tendsto_pi_nhds]
+    intro z
+    have hd : Tendsto (fun a : ℝ ↦ a • (v + L z)) (𝓝[>] 0) (𝓝 0) := by
+      have : Tendsto (fun a : ℝ ↦ a • (v + L z)) (𝓝 0) (𝓝 ((0 : ℝ) • (v + L z))) :=
+        (continuous_id.smul continuous_const).tendsto 0
+      rw [zero_smul] at this
+      exact this.mono_left nhdsWithin_le_nhds
+    have hdC : ∀ᶠ a in 𝓝[>] (0 : ℝ), (0 : E) + a • (v + L z) ∈ C := by
+      filter_upwards [self_mem_nhdsWithin] with a ha
+      rw [zero_add]
+      exact hxC a (mem_Ioi.1 ha).le z z.2
+    have hcd : Tendsto (fun a : ℝ ↦ a⁻¹ • a • (v + L z)) (𝓝[>] 0) (𝓝 (v + L z)) := by
+      refine tendsto_const_nhds.congr' ?_
+      filter_upwards [self_mem_nhdsWithin] with a ha
+      exact (inv_smul_smul₀ (mem_Ioi.1 ha).ne' _).symm
+    have hlim := hFm.lim (c := fun a : ℝ ↦ a⁻¹) hd hdC hcd
+    simp only [zero_add, h0, sub_zero, map_add, hv0, hL] at hlim
+    exact hlim.comp tendsto_comap
+  -- (A–S) "… pointwise, thus uniformly" (Ascoli)
+  have hunif : TendstoUniformly G (fun z : B ↦ (z : F)) ℱ :=
+    UniformFun.tendsto_iff_tendstoUniformly.1 ((hGeq.tendsto_uniformFun_iff_pi ℱ _).2 hpt)
+  obtain ⟨α, hα⟩ := (Metric.tendstoUniformly_iff.1 hunif (r / 2) (by positivity)).exists
+  set a : ℝ := α.1 with ha
+  have ha0 : 0 < a := α.2.1
+  -- `G_α ∘ G₀⁻¹` is uniformly `r/2`-close to the identity
+  have hG : ∀ z ∈ closedBall (0 : F) r, ‖a⁻¹ • Fm (a • (v + L z)) - z‖ ≤ r / 2 := by
     intro z hz
-    have hz' : ‖v + L z‖ ≤ R := hvLz z hz
-    rw [norm_smul, Real.norm_of_nonneg hα0.le]
-    calc α * ‖v + L z‖ ≤ α * R := mul_le_mul_of_nonneg_left hz' hα0.le
-      _ < α * (2 * (R + 1)) := mul_lt_mul_of_pos_left (by linarith) hα0
-      _ = min δ (min ρ εO) := by rw [hα]; field_simp
-  have hxC : ∀ z ∈ closedBall (0 : F) r, α • (v + L z) ∈ C := fun z hz ↦
-    hCcone _ (hrC z hz) α hα0.le
-  -- `G_α(z) = α⁻¹ F(α(v + L z))` is uniformly `r/2`-close to `G₀ = id`
-  have hG : ∀ z ∈ closedBall (0 : F) r, ‖α⁻¹ • Fm (α • (v + L z)) - z‖ ≤ r / 2 := by
-    intro z hz
-    have hlin : Fm' (α • (v + L z)) = α • z := by rw [map_smul, map_add, hv0, hL, zero_add]
-    have hx := hxbd z hz
-    have h1 := hδlo _ (hxC z hz) (hx.trans_le (min_le_left _ _))
-    have heq : α⁻¹ • Fm (α • (v + L z)) - z =
-        α⁻¹ • (Fm (α • (v + L z)) - Fm' (α • (v + L z))) := by
-      rw [hlin, smul_sub, inv_smul_smul₀ hα0.ne']
-    have hz' : ‖v + L z‖ ≤ R := hvLz z hz
-    rw [heq, norm_smul, norm_inv, Real.norm_of_nonneg hα0.le]
-    rw [norm_smul, Real.norm_of_nonneg hα0.le] at h1
-    calc α⁻¹ * ‖Fm (α • (v + L z)) - Fm' (α • (v + L z))‖
-        ≤ α⁻¹ * (r / (2 * (R + 1)) * (α * ‖v + L z‖)) :=
-          mul_le_mul_of_nonneg_left h1 (inv_nonneg.2 hα0.le)
-      _ = r / (2 * (R + 1)) * ‖v + L z‖ := by field_simp
-      _ ≤ r / (2 * (R + 1)) * R := mul_le_mul_of_nonneg_left hz' (by positivity)
-      _ ≤ r / 2 := by
-          rw [div_mul_eq_mul_div, div_le_div_iff₀ (by positivity) (by norm_num)]
-          nlinarith
-  -- continuity of `G_α` on the ball (`F` is Lipschitz on `C ∩ B(0, ρ)`)
-  have hGcont : ContinuousOn (fun z ↦ α⁻¹ • Fm (α • (v + L z))) (closedBall (0 : F) r) := by
-    refine (hKl.continuousOn.comp (by fun_prop) fun z hz ↦ ⟨hxC z hz, ?_⟩).const_smul _
-    exact mem_ball_zero_iff.2 ((hxbd z hz).trans_le ((min_le_right _ _).trans (min_le_left _ _)))
-  -- Brouwer: for `x̃` small, `Id - G_α + x̃` has a fixed point in the ball
+    have h := hα ⟨z, hz⟩
+    rw [dist_comm, dist_eq_norm] at h
+    exact h.le
+  -- continuity of `G_α ∘ G₀⁻¹` on the ball (`F` is Lipschitz on `C ∩ B(0, ρ)`)
+  have hGcont : ContinuousOn (fun z ↦ a⁻¹ • Fm (a • (v + L z))) (closedBall (0 : F) r) :=
+    (hKl.continuousOn.comp (by fun_prop) fun z hz ↦ hxρ a α.2 z hz).const_smul _
+  -- Brouwer: for `x̃` small, `Id - G_α ∘ G₀⁻¹ + x̃` has a fixed point in the ball
   have hsol : ∀ w ∈ closedBall (0 : F) (r / 2), ∃ z ∈ closedBall (0 : F) r,
-      α⁻¹ • Fm (α • (v + L z)) = w := by
+      a⁻¹ • Fm (a • (v + L z)) = w := by
     intro w hw
-    have hmaps : MapsTo (fun z ↦ z - α⁻¹ • Fm (α • (v + L z)) + w) (closedBall (0 : F) r)
+    have hmaps : MapsTo (fun z ↦ z - a⁻¹ • Fm (a • (v + L z)) + w) (closedBall (0 : F) r)
         (closedBall (0 : F) r) := by
       intro z hz
       rw [mem_closedBall_zero_iff]
-      calc ‖z - α⁻¹ • Fm (α • (v + L z)) + w‖
-          ≤ ‖α⁻¹ • Fm (α • (v + L z)) - z‖ + ‖w‖ := by
-            rw [← norm_neg (α⁻¹ • Fm (α • (v + L z)) - z), neg_sub]; exact norm_add_le _ _
+      calc ‖z - a⁻¹ • Fm (a • (v + L z)) + w‖
+          ≤ ‖a⁻¹ • Fm (a • (v + L z)) - z‖ + ‖w‖ := by
+            rw [← norm_neg (a⁻¹ • Fm (a • (v + L z)) - z), neg_sub]; exact norm_add_le _ _
         _ ≤ r / 2 + r / 2 := add_le_add (hG z hz) (mem_closedBall_zero_iff.1 hw)
         _ = r := by ring
     obtain ⟨z, hz, hfix⟩ := Brouwer.exists_fixedPoint (convex_closedBall 0 r)
       (isCompact_closedBall 0 r) (nonempty_closedBall.2 hr.le) hmaps
       ((continuousOn_id.sub hGcont).add continuousOn_const)
     refine ⟨z, hz, ?_⟩
-    have : z - α⁻¹ • Fm (α • (v + L z)) + w - z = 0 := by rw [hfix, sub_self]
+    have : z - a⁻¹ • Fm (a • (v + L z)) + w - z = 0 := by rw [hfix, sub_self]
     linear_combination (norm := module) -this
   -- hence `F(α(v + B)) ⊇ α B(0, r/2)`, a neighbourhood of `0`
   rw [mem_interior_iff_mem_nhds]
-  refine mem_of_superset (closedBall_mem_nhds (0 : F) (by positivity : 0 < α * (r / 2))) ?_
+  refine mem_of_superset (closedBall_mem_nhds (0 : F) (by positivity : 0 < a * (r / 2))) ?_
   intro w hw
-  have hw' : α⁻¹ • w ∈ closedBall (0 : F) (r / 2) := by
-    rw [mem_closedBall_zero_iff, norm_smul, norm_inv, Real.norm_of_nonneg hα0.le]
-    rw [inv_mul_le_iff₀ hα0]
+  have hw' : a⁻¹ • w ∈ closedBall (0 : F) (r / 2) := by
+    rw [mem_closedBall_zero_iff, norm_smul, norm_inv, Real.norm_of_nonneg ha0.le]
+    rw [inv_mul_le_iff₀ ha0]
     exact mem_closedBall_zero_iff.1 hw
   obtain ⟨z, hz, hzw⟩ := hsol _ hw'
-  refine ⟨α • (v + L z), ⟨hεOO ?_, hxC z hz⟩, ?_⟩
-  · exact mem_ball_zero_iff.2 ((hxbd z hz).trans_le ((min_le_right _ _).trans (min_le_right _ _)))
-  · rw [← smul_inv_smul₀ hα0.ne' (Fm _), hzw, smul_inv_smul₀ hα0.ne']
+  refine ⟨a • (v + L z), ⟨hεOO ?_, hxC a ha0.le z hz⟩, ?_⟩
+  · exact mem_ball_zero_iff.2 ((hxbd a α.2 z hz).trans_le (min_le_right _ _))
+  · rw [← smul_inv_smul₀ ha0.ne' (Fm _), hzw, smul_inv_smul₀ ha0.ne']

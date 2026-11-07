@@ -62,7 +62,7 @@ open scoped NNReal Interval
 namespace ControlSystem
 
 variable {E V : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-  [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
+  [NormedAddCommGroup V]
 
 open Classical in
 /-- The needle control (12.14) of Agrachev–Sachkov: `wᵢ` on `[τᵢ, τᵢ + σᵢ)` (the first such `i`
@@ -71,7 +71,7 @@ noncomputable def needleControl (ũ : ℝ → V) {k : ℕ} (τ : Fin k → ℝ) 
     (σ : Fin k → ℝ) : ℝ → V :=
   fun t ↦ if h : ∃ i, t ∈ Ico (τ i) (τ i + σ i) then w (Fin.find _ h) else ũ t
 
-omit [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
+omit [NormedAddCommGroup V] in
 /-- `u_0 = ũ`. -/
 theorem needleControl_zero (ũ : ℝ → V) {k : ℕ} (τ : Fin k → ℝ) (w : Fin k → V) :
     needleControl ũ τ w 0 = ũ := by
@@ -84,7 +84,7 @@ def orthant (k : ℕ) : Set (Fin k → ℝ) := {σ | ∀ i, 0 ≤ σ i}
 variable {f : E → V → E} {U : Set V} {M L : ℝ≥0} {ũ : ℝ → V} {t₁ : ℝ} {k : ℕ}
   {τ : Fin k → ℝ} {w : Fin k → V}
 
-omit [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
+omit [NormedAddCommGroup V] in
 /-- At a time `t` of the `i`-th interval and of no earlier one, `u_σ(t) = wᵢ`. -/
 private theorem needleControl_eq_of_mem {σ : Fin k → ℝ} {t : ℝ} {i : Fin k}
     (hi : t ∈ Ico (τ i) (τ i + σ i)) (hmin : ∀ j < i, t ∉ Ico (τ j) (τ j + σ j)) :
@@ -93,14 +93,14 @@ private theorem needleControl_eq_of_mem {σ : Fin k → ℝ} {t : ℝ} {i : Fin 
   simp only [needleControl, dite_eq_left h]
   exact congrArg w ((Fin.find_eq_iff h).2 ⟨hi, hmin⟩)
 
-omit [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
+omit [NormedAddCommGroup V] in
 /-- Outside the intervals, `u_σ(t) = ũ(t)`. -/
 private theorem needleControl_eq_of_forall_notMem {σ : Fin k → ℝ} {t : ℝ}
     (h : ∀ i, t ∉ Ico (τ i) (τ i + σ i)) : needleControl ũ τ w σ t = ũ t := by
   have h' : ¬ ∃ i, t ∈ Ico (τ i) (τ i + σ i) := fun ⟨i, hi⟩ ↦ h i hi
   simp only [needleControl, dite_eq_right h']
 
-omit [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
+omit [NormedAddCommGroup V] in
 /-- `u_σ(t) = u_σ'(t)` when `t` lies in the same intervals for `σ` and `σ'`. -/
 private theorem needleControl_eq_of_forall_iff {σ σ' : Fin k → ℝ} {t : ℝ}
     (h : ∀ i, t ∈ Ico (τ i) (τ i + σ i) ↔ t ∈ Ico (τ i) (τ i + σ' i)) :
@@ -115,7 +115,7 @@ private theorem needleControl_eq_of_forall_iff {σ σ' : Fin k → ℝ} {t : ℝ
     rw [needleControl_eq_of_forall_notMem hex,
       needleControl_eq_of_forall_notMem fun i hi ↦ hex i ((h i).2 hi)]
 
-omit [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
+omit [NormedAddCommGroup V] in
 /-- `u_σ` and `u_σ'` agree outside `⋃ᵢ [τᵢ + min(σᵢ, σ'ᵢ), τᵢ + max(σᵢ, σ'ᵢ))`. -/
 private theorem needleControl_eq_of_notMem {σ σ' : Fin k → ℝ} {t : ℝ}
     (ht : t ∉ ⋃ i, Ico (τ i + min (σ i) (σ' i)) (τ i + max (σ i) (σ' i))) :
@@ -134,14 +134,13 @@ private theorem needleControl_eq_of_notMem {σ σ' : Fin k → ℝ} {t : ℝ}
     · rintro ⟨h1, h2⟩; exact ⟨h1, lt_of_not_ge fun h3 ↦ (hti h3).not_gt h2⟩
     · rintro ⟨h1, h2⟩; exact ⟨h1, by linarith⟩
 
-omit [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
+omit [NormedAddCommGroup V] in
 private theorem needleControl_mem (hw : ∀ i, w i ∈ U) {σ : Fin k → ℝ} {t : ℝ} (ht : ũ t ∈ U) :
     needleControl ũ τ w σ t ∈ U := by
   unfold needleControl
   split_ifs
   exacts [hw _, ht]
 
-set_option linter.unusedSectionVars false in
 /-- A needle control is a control on `[0, t₁]` when `ũ` is and the values `wᵢ` lie in `U`. -/
 theorem isControlOn_needleControl (hũ : IsControlOn ũ U 0 t₁) (hw : ∀ i, w i ∈ U)
     (σ : Fin k → ℝ) : IsControlOn (needleControl ũ τ w σ) U 0 t₁ := by
@@ -177,7 +176,7 @@ theorem isControlOn_needleControl (hũ : IsControlOn ũ U 0 t₁) (hw : ∀ i, w
   exact hũ.aestronglyMeasurable.add (Finset.aestronglyMeasurable_fun_sum _ fun i _ ↦
     (aestronglyMeasurable_const.sub hũ.aestronglyMeasurable).indicator (hA i))
 
-omit [FiniteDimensional ℝ E] [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
+omit [FiniteDimensional ℝ E] in
 /-- The velocities of two needle controls along any curve `y` differ by at most `2M` on a set of
 measure at most `Σᵢ |σᵢ - σ'ᵢ|`. -/
 private theorem integral_norm_needle_sub_le (hf : IsBoundedC1System f U M L)
@@ -235,10 +234,9 @@ private theorem norm_flow_needle_sub_le (hf : IsBoundedC1System f U M L)
     (add_nonneg (norm_nonneg _) (intervalIntegral.integral_nonneg ht.1 fun r _ ↦ norm_nonneg _))
     (Real.exp_pos _).le
 
-variable {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P] [FiniteDimensional ℝ P]
+variable {P : Type*} [NormedAddCommGroup P] [NormedSpace ℝ P]
   {ψ : P → E} {a₀ : P}
 
-set_option linter.unusedSectionVars false in
 /-- The end-point map of needle variations is Lipschitz near `(a₀, 0)` on the cone `P × ℝᵏ₊`
 (Agrachev–Sachkov, p. 172: "is Lipschitzian"). -/
 theorem lipschitzOnWith_needle (hf : IsBoundedC1System f U M L) (ht₁ : 0 < t₁)
@@ -272,10 +270,10 @@ theorem lipschitzOnWith_needle (hf : IsBoundedC1System f U M L) (ht₁ : 0 < t�
       ≤ Real.exp (L * t₁) * (K * dist p p' + 2 * M * (k * dist p p')) := by gcongr
     _ = Real.exp (L * t₁) * (K + 2 * M * k) * dist p p' := by ring
 
-omit [NormedSpace ℝ P] [FiniteDimensional ℝ P] in
-/-- The trajectories of needle variations are uniformly close to the reference trajectory
-(the statement of `ControlSystem.norm_needle_trajectory_sub_lt`). -/
-private theorem needle_trajectory_close (hf : IsBoundedC1System f U M L)
+omit [NormedSpace ℝ P] in
+/-- The trajectories of needle variations from `ψ(a)` are uniformly close to the reference
+trajectory from `ψ(a₀)` for `(a, σ)` near `(a₀, 0)` in the cone. -/
+theorem norm_needle_trajectory_sub_lt (hf : IsBoundedC1System f U M L)
     (hũ : IsControlOn ũ U 0 t₁) (hw : ∀ i, w i ∈ U) (hψ : ContinuousAt ψ a₀) {η : ℝ}
     (hη : 0 < η) :
     ∃ ρ > 0, ∀ p ∈ (univ ×ˢ orthant k) ∩ ball (a₀, 0) ρ, ∀ t ∈ Icc 0 t₁,
@@ -358,7 +356,7 @@ private theorem flow_needle_sub_eq_sum (hf : IsBoundedC1System f U M L) (ht₁ :
   have hσi : 0 ≤ σ i := hσ i
   rw [intervalIntegral.integral_of_le (by linarith), integral_Ioc_eq_integral_Ioo]
 
-omit [NormedSpace ℝ P] [FiniteDimensional ℝ P] in
+omit [NormedSpace ℝ P] in
 /-- The estimate at one needle: for `(a, σ)` near `(a₀, 0)` in the cone,
 `‖∫_{τᵢ}^{τᵢ+σᵢ} g_{t,wᵢ}(y(t)) dt - σᵢ g_{τᵢ,wᵢ}(q₁)‖ ≤ ε σᵢ`, by the continuity of
 `(t, z, v) ↦ D_x P_{t → t₁}(P_{t₁ → t} z)(f(P_{t₁ → t} z, wᵢ) - f(P_{t₁ → t} z, v))`, the
@@ -422,9 +420,9 @@ private theorem needle_integral_estimate (hf : IsBoundedC1System f U M L) (ht₁
   obtain ⟨CH, hCH⟩ := hf.isCompact.exists_bound_of_continuousOn hGv
   have hHint : IntegrableOn (fun θ ↦ ‖G (τ i, q₁, ũ θ) - G (τ i, q₁, ũ (τ i))‖) (Icc 0 t₁) := by
     refine Integrable.of_bound ?_ (2 * CH) ?_
-    · exact nv_aestronglyMeasurable_comp_of_continuousOn
-        (G := fun v ↦ ‖G (τ i, q₁, v) - G (τ i, q₁, ũ (τ i))‖) hf.isCompact.isClosed
-        (hGv.sub continuousOn_const).norm hũ.aestronglyMeasurable
+    · exact ContinuousOn.comp_aestronglyMeasurable_of_isClosed
+        (G := fun v ↦ ‖G (τ i, q₁, v) - G (τ i, q₁, ũ (τ i))‖) (hGv.sub continuousOn_const).norm
+        hf.isCompact.isClosed hũ.aestronglyMeasurable
         ((ae_restrict_iff' measurableSet_Icc).2 (Eventually.of_forall hũ.mem))
     · refine (ae_restrict_iff' measurableSet_Icc).2 (Eventually.of_forall fun θ hθ ↦ ?_)
       rw [norm_norm]
@@ -433,7 +431,7 @@ private theorem needle_integral_estimate (hf : IsBoundedC1System f U M L) (ht₁
   -- the varied trajectories stay close to the reference one
   set η := min δ₁ 1 / (2 * Real.exp (L * t₁)) with hηdef
   have hη : 0 < η := by positivity
-  obtain ⟨ρ₃, hρ₃, hclose⟩ := needle_trajectory_close (τ := τ) (w := w) hf hũ hw hψ hη
+  obtain ⟨ρ₃, hρ₃, hclose⟩ := norm_needle_trajectory_sub_lt (τ := τ) (w := w) hf hũ hw hψ hη
   have hball : ∀ ρ > 0, ∀ᶠ p in 𝓝[univ ×ˢ orthant k] ((a₀, 0) : P × (Fin k → ℝ)),
       p ∈ ball ((a₀, 0) : P × (Fin k → ℝ)) ρ :=
     fun ρ hρ ↦ eventually_nhdsWithin_of_eventually_nhds (Metric.ball_mem_nhds _ hρ)
@@ -517,7 +515,6 @@ private theorem needle_integral_estimate (hf : IsBoundedC1System f U M L) (ht₁
   rw [intervalIntegral.integral_of_le (by linarith)]
   linarith
 
-set_option linter.unusedSectionVars false in
 /-- **Derivative of the needle variations** at `(a₀, 0)` within the cone `P × ℝᵏ₊`
 (Agrachev–Sachkov, p. 172: `∂F/∂sᵢ|_{s=0} = g_{τᵢ,uᵢ}(q₁)`; p. 182: `∂F/∂q v = P^{t₁}_* v`):
 `(α, σ) ↦ D_x P_{0 → t₁}(ψ(a₀)) Dψ(a₀) α + Σᵢ σᵢ g_{τᵢ,wᵢ}(q₁)`, for distinct needle times
@@ -603,16 +600,5 @@ theorem hasFDerivWithinAt_needle (hf : IsBoundedC1System f U M L) (ht₁ : 0 < t
   convert hP.hasFDerivWithinAt.add hR using 1
   funext p
   simp
-
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
-/-- The trajectories of needle variations from `ψ(a)` are uniformly close to the reference
-trajectory from `ψ(a₀)` for `(a, σ)` near `(a₀, 0)` in the cone. -/
-theorem norm_needle_trajectory_sub_lt (hf : IsBoundedC1System f U M L) (ht₁ : 0 < t₁)
-    (hũ : IsControlOn ũ U 0 t₁) (hw : ∀ i, w i ∈ U) (hψ : ContinuousAt ψ a₀) {η : ℝ}
-    (hη : 0 < η) :
-    ∃ ρ > 0, ∀ p ∈ (univ ×ˢ orthant k) ∩ ball (a₀, 0) ρ, ∀ t ∈ Icc 0 t₁,
-      ‖flow f (needleControl ũ τ w p.2) 0 t (ψ p.1) - flow f ũ 0 t (ψ a₀)‖ < η :=
-  needle_trajectory_close hf hũ hw hψ hη
 
 end ControlSystem

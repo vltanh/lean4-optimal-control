@@ -40,9 +40,9 @@ Agrachev–Sachkov, *Control Theory from the Geometric Viewpoint* (authors' draf
 §10.1, p. 133), take these facts from "the classical Carathéodory Theorem (see e.g. [8])",
 [8] = R. V. Gamkrelidze, *Principles of optimal control theory*, Plenum 1978, and assume
 complete vector fields (for instance with compact support). Departure D11 (the departures from
-Agrachev–Sachkov are listed in the README): the cited texts were not consulted; the facts are
-proved by the standard Picard iteration and Gronwall argument, and the cut-off to a compact tube
-replaces A–S's completeness assumption. The flow is defined by choice from the solution on the
+Agrachev–Sachkov are listed in the README): the facts are proved here by the standard Picard
+iteration and Gronwall argument, and the cut-off to a compact tube replaces A–S's completeness
+assumption. The flow is defined by choice from the solution on the
 interval between the two times, so that it depends only on the control there.
 
 ## Proof sketch
@@ -68,7 +68,7 @@ open scoped NNReal Interval
 namespace ControlSystem
 
 variable {E V F : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-  [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
+  [NormedAddCommGroup V]
   [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
 
 /-! ### Regularity of control systems -/
@@ -106,7 +106,7 @@ structure IsControlOn (u : ℝ → V) (U : Set V) (a b : ℝ) : Prop where
   aestronglyMeasurable : AEStronglyMeasurable u (volume.restrict (Icc a b))
   mem : ∀ t ∈ Icc a b, u t ∈ U
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional ℝ E] in
 /-- A bounded `C¹` system satisfies the standing hypotheses, with the bound `L` on `∂ₓf` as
 Lipschitz constant (mean value inequality). -/
 theorem IsBoundedC1System.isLipschitzSystem {f : E → V → E} {U : Set V} {M L : ℝ≥0}
@@ -139,7 +139,7 @@ private lemma continuousOn_univ_prod_of_vanish {X Y Z : Type*} [TopologicalSpace
       exact hG0 q hq.1
     exact (continuousAt_const.congr hev.symm).continuousWithinAt
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional ℝ F] in
 /-- **Cut-off.** A `C¹` system on an open set `Ω` (`IsC1On`) with compact `U` agrees, on a
 closed `δ`-neighbourhood of a compact `K ⊆ Ω`, with a globally bounded `C¹` system. This replaces
 Agrachev–Sachkov's assumption of complete vector fields (§2.4.1; departure D11).
@@ -330,7 +330,7 @@ noncomputable def flow (f : E → V → E) (u : ℝ → V) (s t : ℝ) (x : E) :
 
 variable {f : E → V → E} {U : Set V} {L : ℝ≥0} {u w : ℝ → V} {a b : ℝ}
 
-omit [FiniteDimensional ℝ E] [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
+omit [FiniteDimensional ℝ E] [NormedAddCommGroup V] in
 /-- The flow at the initial time is the identity. -/
 theorem flow_self (f : E → V → E) (u : ℝ → V) (s : ℝ) (x : E) : flow f u s s x = x := by
   unfold flow
@@ -338,17 +338,17 @@ theorem flow_self (f : E → V → E) (u : ℝ → V) (s : ℝ) (x : E) : flow f
   · simpa using h.choose_spec.2.2 s (by simp)
   · rfl
 
-omit [FiniteDimensional ℝ E] [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
+omit [FiniteDimensional ℝ E] in
 private lemma isControlOn_mono {c d : ℝ} (hu : IsControlOn u U a b) (h : Icc c d ⊆ Icc a b) :
     IsControlOn u U c d :=
   ⟨hu.1.mono_set h, fun t ht ↦ hu.2 t (h ht)⟩
 
-omit [FiniteDimensional ℝ E] [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
+omit [FiniteDimensional ℝ E] [NormedAddCommGroup V] in
 private lemma isSolution_mono {s : ℝ} {x : E} {y : ℝ → E} {c d : ℝ}
     (hy : IsSolution f u s x a b y) (h : [[c, d]] ⊆ [[a, b]]) : IsSolution f u s x c d y :=
   ⟨hy.1.mono h, hy.2.1.mono_set h, fun t ht ↦ hy.2.2 t (h ht)⟩
 
-omit [FiniteDimensional ℝ E] [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
+omit [FiniteDimensional ℝ E] [NormedAddCommGroup V] in
 private lemma isSolution_congr {s : ℝ} {x : E} {y y' : ℝ → E} (hy : IsSolution f u s x a b y)
     (h : EqOn y' y [[a, b]]) (hs : s ∈ [[a, b]]) : IsSolution f u s x a b y' := by
   refine ⟨hy.1.congr h, hy.2.1.congr fun r hr ↦ ?_, fun t ht ↦ ?_⟩
@@ -358,7 +358,6 @@ private lemma isSolution_congr {s : ℝ} {x : E} {y y' : ℝ → E} (hy : IsSolu
     refine intervalIntegral.integral_congr fun r hr ↦ ?_
     simp only [h (uIcc_subset_uIcc hs ht hr)]
 
-omit [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
 /-- Along a continuous curve, `t ↦ f(y(t), u(t))` is integrable on `[a, b]`: it is bounded, and
 measurable by composing a continuous (Tietze) extension of `f` off `E × U` with `(y, u)`. -/
 private lemma intervalIntegrable_comp_control (hf : IsLipschitzSystem f U L)
@@ -411,7 +410,6 @@ private lemma abs_integral_exp_abs_le {lam : ℝ} (hlam : 0 < lam) (s t : ℝ) :
     rw [e, abs_neg]
     rwa [show -t - -s = -(t - s) by ring, abs_neg] at h
 
-set_option linter.unusedSectionVars false in
 /-- **Carathéodory's theorem**, existence: under the standing hypotheses, for a control on
 `[a, b]` and `s ∈ [a, b]`, there is a solution on `[a, b]` through `(s, x)`.
 
@@ -488,7 +486,6 @@ theorem exists_isSolution (hf : IsLipschitzSystem f U L) (hu : IsControlOn u U a
     rfl
   rw [h1, h2, smul_inv_smul₀ (hρ0 t).ne']
 
-omit [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
 /-- The comparison estimate behind uniqueness and the Lipschitz estimates: a solution `y` for
 the control `u` through `(s, x)` and a solution `z` for the control `w` through `(s, x')`
 satisfy `‖y(t) - z(t)‖ ≤ e^{L|t - s|} (‖x - x'‖ + |∫ₛᵗ ‖f(z, u) - f(z, w)‖|)` (Gronwall on the
@@ -558,7 +555,6 @@ private lemma norm_sub_le_of_isSolution (hf : IsLipschitzSystem f U L)
     _ ≤ ‖x - x'‖ + L * |∫ r in s..τ, φ r| + |∫ r in s..t, g r| := by gcongr
     _ = ‖x - x'‖ + |∫ r in s..t, g r| + L * |∫ r in s..τ, φ r| := by ring
 
-set_option linter.unusedSectionVars false in
 /-- **Carathéodory's theorem**, uniqueness: two solutions on `[a, b]` through the same point
 `(s, x)` agree on `[a, b]` (Gronwall). -/
 theorem IsSolution.eqOn (hf : IsLipschitzSystem f U L) (hu : IsControlOn u U a b) {s : ℝ}
@@ -683,7 +679,7 @@ theorem norm_flow_sub_flow_control_le (hf : IsLipschitzSystem f U L) (hu : IsCon
 
 /-! ### Flows and admissible pairs -/
 
-variable [MeasurableSpace V] [BorelSpace V]
+variable [NormedSpace ℝ V] [FiniteDimensional ℝ V] [MeasurableSpace V] [BorelSpace V]
 
 /-- The trajectory of an admissible pair (`ControlSystem.IsAdmissible`, from `x₀` at time `0`)
 is the flow from `(0, x₀)`. -/

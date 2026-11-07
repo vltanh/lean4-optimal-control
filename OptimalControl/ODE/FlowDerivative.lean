@@ -45,12 +45,11 @@ open scoped NNReal Interval
 namespace ControlSystem
 
 variable {E V : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
-  [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
+  [NormedAddCommGroup V]
   {f : E → V → E} {U : Set V} {M L : ℝ≥0} {u : ℝ → V} {a b : ℝ}
 
 /-! ### Auxiliary facts -/
 
-omit [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
 /-- `r ↦ G(z(r), u(r))` is a.e. strongly measurable on `[a, b]` for `G` continuous on `E × U`
 (`U` closed), `z` continuous on `[a, b]` and `u` a control. -/
 private theorem aestronglyMeasurable_comp_control {W : Type*} [NormedAddCommGroup W]
@@ -89,7 +88,7 @@ private theorem aestronglyMeasurable_lin (hf : IsBoundedC1System f U M L)
   aestronglyMeasurable_comp_control (G := fun z v ↦ fderiv ℝ (f · v) z)
     hf.isC1On.continuousOn_fderiv hf.isCompact.isClosed (continuousOn_flow_right hf hu hs x) hu
 
-omit [FiniteDimensional ℝ E] [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
+omit [FiniteDimensional ℝ E] in
 private theorem norm_lin_le (hf : IsBoundedC1System f U M L) (hu : IsControlOn u U a b)
     {s : ℝ} {x : E} {r : ℝ} (hr : r ∈ Icc a b) : ‖lin f u s x r‖ ≤ L :=
   hf.norm_fderiv_le _ _ (hu.mem r hr)
@@ -137,7 +136,7 @@ private theorem exists_delta_fderiv (hf : IsBoundedC1System f U M L)
         exact max_lt (hz.trans_le (min_le_left _ _)) hδ)
   rwa [dist_eq_norm] at h
 
-omit [FiniteDimensional ℝ E] [NormedSpace ℝ V] [FiniteDimensional ℝ V] in
+omit [FiniteDimensional ℝ E] in
 /-- The first-order remainder of `f(·, v)` at `y`, by the mean value inequality:
 `‖f(y + w, v) - f(y, v) - ∂ₓf(y, v) w‖ ≤ ε ‖w‖` if `‖∂ₓf(z, v) - ∂ₓf(y, v)‖ ≤ ε` on the closed
 ball of radius `‖w‖` around `y`. -/
