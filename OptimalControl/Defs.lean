@@ -28,8 +28,8 @@ maximum principle in `OptimalControl/Pontryagin/`.
 
 Agrachev and Sachkov, *Control Theory from the Geometric Viewpoint* (Encyclopaedia of
 Mathematical Sciences 87, Springer, 2004), are cited from the authors' draft (preface September
-2003), whose page numbers are used; the departures D1–D11 from their text are listed in the
-README.
+2003), whose page numbers are used; the departures D1–D11 from their text are listed in
+`docs/AGRACHEV_SACHKOV.md`.
 -/
 
 @[expose] public section

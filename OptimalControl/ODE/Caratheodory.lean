@@ -40,9 +40,9 @@ Agrachev–Sachkov, *Control Theory from the Geometric Viewpoint* (authors' draf
 §10.1, p. 133), take these facts from "the classical Carathéodory Theorem (see e.g. [8])",
 [8] = R. V. Gamkrelidze, *Principles of optimal control theory*, Plenum 1978, and assume
 complete vector fields (for instance with compact support). Departure D11 (the departures from
-Agrachev–Sachkov are listed in the README): the facts are proved here by the standard Picard
-iteration and Gronwall argument, and the cut-off to a compact tube replaces A–S's completeness
-assumption. The flow is defined by choice from the solution on the
+Agrachev–Sachkov are listed in `docs/AGRACHEV_SACHKOV.md`): the facts are proved here by the
+standard Picard iteration and Gronwall argument, and the cut-off to a compact tube replaces
+A–S's completeness assumption. The flow is defined by choice from the solution on the
 interval between the two times, so that it depends only on the control there.
 
 ## Proof sketch

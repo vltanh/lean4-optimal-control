@@ -29,7 +29,7 @@ finite-dimensional real normed space `E` (departure D1):
   `λ₀ ⊥ T N₀`: `exists_costate_of_boundary`. Every other version of the maximum principle in
   `OptimalControl/Pontryagin/` is derived from it by A–S's reductions.
 
-## Readings and departures (listed in the README)
+## Readings and departures (listed in `docs/AGRACHEV_SACHKOV.md`)
 
 D1 open subset of `E` for the manifold `M`; D2 chronological calculus read pointwise
 (`g_{τ,u}(q₁)` through the resolvent of the variational equation, `needleVector`; Proposition

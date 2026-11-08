@@ -9,7 +9,7 @@ The objects of Chapter 12 of A. A. Agrachev and Yu. L. Sachkov, *Control Theory 
 Geometric Viewpoint* (Encyclopaedia of Mathematical Sciences 87, Springer, 2004; cited from the
 authors' draft, preface September 2003, whose page numbers are used), read on an open subset `Ω`
 of a finite-dimensional real normed space `E` (departure D1; the departures
-from A–S are listed in the README):
+from A–S are listed in `docs/AGRACHEV_SACHKOV.md`):
 
 * the control system `q' = f_u(q)`, `q ∈ Ω`, `u ∈ U ⊆ V` ((12.1), p. 163), with
   `ControlSystem.IsC1On f Ω U` for A–S's (10.2)–(10.4) (`C¹` for `C^∞`, D3) and `U` compact

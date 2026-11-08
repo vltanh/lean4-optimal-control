@@ -134,9 +134,9 @@ automation:
 
 fidelity:
   divergences: >-
-    Readings and departures from Agrachev and Sachkov (authors' draft; README, "Readings and
-    departures from Agrachev-Sachkov"). D1: the manifold M is an open subset Omega of a
-    finite-dimensional real normed space E. D2: the chronological calculus (operators on
+    Readings and departures from Agrachev and Sachkov (authors' draft; docs/AGRACHEV_SACHKOV.md,
+    "Readings and departures from Agrachev-Sachkov"). D1: the manifold M is an open subset Omega
+    of a finite-dimensional real normed space E. D2: the chronological calculus (operators on
     C^infinity(M); (2.19), (2.28), (2.31), Proposition 11.3) is read pointwise along trajectories,
     in coordinates: the vectors g_{tau,u} through the resolvent of the variational equation,
     Proposition 11.3 as the adjoint equation, the variations formula (12.13) as an integral
@@ -188,16 +188,16 @@ fidelity:
     completeness of E, which follows from finite dimension); the Solution supplies them.
 
 
-    Gaps found in the source (README, "Gaps in Agrachev-Sachkov"). Lemma 12.1, Remark (1): the
-    proof takes points in the interior of the cone, which is empty for a convex cone with empty
-    interior, a case the remark allows; the proof here takes the points v + L z as combinations of
-    points of the cone with positive coefficients, so it uses no interior (for the cones to which
-    the lemma is applied, R^k_+ and P x R^k_+, the source's step is valid as written). A needle at
-    t1: in the proof of Lemma 12.2 the set of Lebesgue points may contain t1, and a needle at t1
-    gives no variation on [0, t1]; such a needle time is moved to a nearby Lebesgue point of
-    (0, t1), as Agrachev and Sachkov move repeated times. The needle map: that the end-point map of
-    the needle variations is Lipschitz and differentiable at 0, with partial derivatives
-    g_{tau_i,u_i}(q1) (p. 172), is stated without proof; it is proved
+    Gaps found in the source (docs/AGRACHEV_SACHKOV.md, "Gaps in Agrachev-Sachkov"). Lemma 12.1,
+    Remark (1): the proof takes points in the interior of the cone, which is empty for a convex cone
+    with empty interior, a case the remark allows; the proof here takes the points v + L z as
+    combinations of points of the cone with positive coefficients, so it uses no interior (for the
+    cones to which the lemma is applied, R^k_+ and P x R^k_+, the source's step is valid as
+    written). A needle at t1: in the proof of Lemma 12.2 the set of Lebesgue points may contain t1,
+    and a needle at t1 gives no variation on [0, t1]; such a needle time is moved to a nearby
+    Lebesgue point of (0, t1), as Agrachev and Sachkov move repeated times. The needle map: that the
+    end-point map of the needle variations is Lipschitz and differentiable at 0, with partial
+    derivatives g_{tau_i,u_i}(q1) (p. 172), is stated without proof; it is proved
     (OptimalControl/ODE/NeedleVariation.lean).
 
 
@@ -218,12 +218,12 @@ review:
   notes: >-
     Before the proofs were written, an independent agent reviewed the statements of Chapter 12
     against Agrachev and Sachkov's draft; afterwards, independent agents compared the proofs with
-    the book's, and the departures they found that were not forced were removed (README,
-    "Readings and departures from Agrachev–Sachkov"). No person has reviewed the proofs or the
-    statements. Lean's kernel has checked the proofs; Comparator (with the Lean and NanoDa
-    kernels) checks that OptimalControlSolution proves the statements of OptimalControlChallenge
-    with the standard axioms only, and the axiom audit (scripts/Audit.lean) checks every
-    declaration of the library.
+    the book's, and the departures they found that were not forced were removed
+    (docs/AGRACHEV_SACHKOV.md, "Readings and departures from Agrachev–Sachkov"). No person has
+    reviewed the proofs or the statements. Lean's kernel has checked the proofs; Comparator (with
+    the Lean and NanoDa kernels) checks that OptimalControlSolution proves the statements of
+    OptimalControlChallenge with the standard axioms only, and the axiom audit (scripts/Audit.lean)
+    checks every declaration of the library.
 
 alignment:
   namespace: "OptimalControlChallenge"

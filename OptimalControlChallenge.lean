@@ -18,7 +18,7 @@ for integral costs that follows from it (`exists_optimal_fixedTime`, `exists_opt
 This file imports only Mathlib. The definitions between the two markers are copied word for word
 from the library module `OptimalControl/Defs.lean` (`scripts/sync_challenge_defs.py`), so that
 the Challenge and the Solution use the same constants. Page numbers refer to the authors' draft of
-the book (preface September 2003); the departures D1–D11 from it are listed in the README.
+the book (preface September 2003); `docs/AGRACHEV_SACHKOV.md` lists the departures D1–D11.
 
 ## Conventions
 

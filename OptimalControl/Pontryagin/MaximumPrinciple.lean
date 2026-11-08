@@ -25,7 +25,7 @@ every `t` (A–S (12.15)), and the transversality condition (12.53). The control
 (D4), the data `C¹` with `∂f/∂q` jointly continuous (A–S's (10.2)–(10.4) with `C¹` for `C^∞`,
 D3).
 
-## Readings and departures (listed in the README)
+## Readings and departures (listed in `docs/AGRACHEV_SACHKOV.md`)
 
 * D1: `M` an open subset `Ω` of a finite-dimensional real normed space `E`.
 * D2: chronological calculus read pointwise along trajectories (variations formula, derivative
