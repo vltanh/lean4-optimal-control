@@ -3,11 +3,13 @@
 The full statements, the definitions they use, the supporting theory, the method of proof and the
 files. The [README](../README.md) has the overview. The comparison with Agrachev and Sachkov's
 Chapter 12, result by result, with the departures D1–D11 and the gaps found in the source, is in
-[AGRACHEV_SACHKOV.md](AGRACHEV_SACHKOV.md).
+[AGRACHEV_SACHKOV.md](AGRACHEV_SACHKOV.md). The comparison with Sussmann's paper on Noether's
+theorem, with the readings S1–S8, is in [SUSSMANN.md](SUSSMANN.md).
 
 - [Conventions](#conventions)
 - [The statements of record](#the-statements-of-record)
 - [The maximum principle](#the-maximum-principle)
+- [Noether's theorem](#noethers-theorem)
 - [Filippov's theorem and the existence of optimal controls](#filippovs-theorem-and-the-existence-of-optimal-controls)
 - [Measurable selection](#measurable-selection)
 - [Carathéodory theory](#carathéodory-theory)
@@ -18,7 +20,9 @@ Chapter 12, result by result, with the departures D1–D11 and the gaps found in
 
 `E`, `V`, `P` and `Q` are finite-dimensional real normed spaces: `E` is the state space, `V` the
 space of control values (with its Borel σ-algebra), `P` and `Q` parametrize boundary conditions.
-The control set `U ⊆ V` is compact and the state constraint `Ω ⊆ E` is open.
+The state constraint `Ω ⊆ E` is open. In the maximum principle and in Filippov's theorem the
+control set `U ⊆ V` is compact. Noether's theorem needs neither: there `V` is any type with a
+σ-algebra and `U` any subset of it.
 
 The declarations of the maximum principle are in the namespace `Pontryagin`, those on control
 systems in `ControlSystem`.
@@ -32,7 +36,8 @@ It imports only Mathlib and states, with `sorry`:
 - Filippov's theorem (`OptimalControlChallenge.isCompact_reachableSet`,
   `OptimalControlChallenge.isCompact_reachableSetLE`);
 - the existence of optimal controls (`OptimalControlChallenge.exists_optimal_fixedTime`,
-  `OptimalControlChallenge.exists_optimal_freeTime`).
+  `OptimalControlChallenge.exists_optimal_freeTime`);
+- Noether's theorem for optimal control (`OptimalControlChallenge.noether`).
 
 Its module docstring explains every convention the statements use.
 [`OptimalControlSolution.lean`](../OptimalControlSolution.lean) restates them word for word and
@@ -55,8 +60,10 @@ The Challenge's statements are those of the library, with these differences, whi
 - Filippov's theorem is stated without the hypothesis `0 ≤ M` (for `M < 0` the attainable sets
   are empty).
 
+Noether's theorem is stated exactly as in the library.
+
 [`formalization.yaml`](../formalization.yaml) holds the metadata (`formalization.yaml` v0.4): the
-source, the readings and departures, the related formal work and the production process.
+sources, the readings and departures, the related formal work and the production process.
 
 ## The maximum principle
 
@@ -88,25 +95,25 @@ derivative. Then there are `ν ≤ 0` and a Lipschitz covector curve `p` such th
 
 The definitions ([`OptimalControl/Defs.lean`](../OptimalControl/Defs.lean)):
 
-- [`ControlSystem.IsC1On f Ω U`](../OptimalControl/Defs.lean#L79): Agrachev and Sachkov's
+- [`ControlSystem.IsC1On f Ω U`](../OptimalControl/Defs.lean#L85): Agrachev and Sachkov's
   regularity (10.2)–(10.4) with `C¹` for `C^∞`: `(x, u) ↦ f x u` and `(x, u) ↦ ∂ₓf(x, u)` are
   continuous on `Ω × U`, and `f(·, u)` is differentiable on `Ω` for `u ∈ U`;
-- [`IsAdmissibleIn f Ω U x₀ T u x`](../OptimalControl/Defs.lean#L99): `u` is measurable with
+- [`IsAdmissibleIn f Ω U x₀ T u x`](../OptimalControl/Defs.lean#L105): `u` is measurable with
   values in `U` on `[0, T]`, `x` is continuous on `[0, T]` with values in `Ω` and
   `x(t) = x₀ + ∫₀ᵗ f(x(s), u(s)) ds` (a Carathéodory solution,
-  [`ControlSystem.IsAdmissible`](../OptimalControl/Defs.lean#L51));
-- [`IsStrongLocalMinimizer f φ Ω U N T ũ q`](../OptimalControl/Defs.lean#L143): `T > 0`,
+  [`ControlSystem.IsAdmissible`](../OptimalControl/Defs.lean#L57));
+- [`IsStrongLocalMinimizer f φ Ω U N T ũ q`](../OptimalControl/Defs.lean#L149): `T > 0`,
   `(ũ, q)` is admissible in `Ω` on `[0, T]` with `(q(0), q(T)) ∈ N`, and for some `ε > 0` no
   admissible pair `(u', q')` in `Ω` on `[0, T']`, `T' > 0`, with `(q'(0), q'(T')) ∈ N`,
   `|T' - T| < ε` and `‖q'(σ T') - q(σ T)‖ < ε` for all `σ ∈ [0, 1]`, has a smaller cost
   `∫₀^{T'} φ(q', u')`;
-- [`controlHamiltonian`](../OptimalControl/Defs.lean#L109):
+- [`controlHamiltonian`](../OptimalControl/Defs.lean#L115):
   `controlHamiltonian f φ ν q p u = p (f q u) + ν * φ q u`;
-- [`IsAdjoint f φ ν ũ q T p`](../OptimalControl/Defs.lean#L122): the adjoint equation
+- [`IsAdjoint f φ ν ũ q T p`](../OptimalControl/Defs.lean#L128): the adjoint equation
   `ṗ = -p ∘ ∂ₓf(q, ũ) - ν ∂ₓφ(q, ũ)` in integral form,
   `p(t) = p(T) + ∫ₜᵀ (p(r) ∘ ∂ₓf(q(r), ũ(r)) + ν ∂ₓφ(q(r), ũ(r))) dr` on `[0, T]`, the integrand
   being integrable;
-- [`IsMaximal f φ ν U ũ q T p`](../OptimalControl/Defs.lean#L132): for almost every
+- [`IsMaximal f φ ν U ũ q T p`](../OptimalControl/Defs.lean#L138): for almost every
   `t ∈ [0, T]`, `H(q(t), p(t), u) ≤ H(q(t), p(t), ũ(t))` for all `u ∈ U`.
 
 <details>
@@ -170,6 +177,106 @@ def IsStrongLocalMinimizer (f : E → V → E) (φ : E → V → ℝ) (Ω : Set 
 
 [`stateTransition A s t`](../OptimalControl/ODE/LinearCaratheodory.lean#L66) is the resolvent of
 `ξ' = A(t) ξ` from time `s` to time `t`.
+</details>
+
+## Noether's theorem
+
+[`Pontryagin.noether`](../OptimalControl/Pontryagin/Noether.lean#L690): Noether's theorem for
+optimal control, H. J. Sussmann's Theorem 4.1 (1995) for one vector field. Along every extremal
+of the maximum principle, the momentum of an infinitesimal symmetry is constant.
+
+```lean
+theorem noether (hΩ : IsOpen Ω) (hf : ∀ u ∈ U, ContDiffOn ℝ 1 (f · u) Ω)
+    (hφ : ∀ u ∈ U, ContDiffOn ℝ 1 (φ · u) Ω) {Y : E → E}
+    (hY : IsInfinitesimalSymmetry f φ Ω U Y) {T ν : ℝ} {ũ : ℝ → V} {q : ℝ → E}
+    {p : ℝ → StrongDual ℝ E} (href : IsAdmissibleIn f Ω U (q 0) T ũ q)
+    (hadj : IsAdjoint f φ ν ũ q T p) (hmax : IsMaximal f φ ν U ũ q T p) :
+    ∀ t ∈ Icc 0 T, momentum Y (q t) (p t) = momentum Y (q 0) (p 0)
+```
+
+In words: `f(·, u)` and `φ(·, u)` are `C¹` on the open set `Ω` for every `u ∈ U`, and `Y` is an
+infinitesimal symmetry of `(Ω, U, f, φ)`. If `(ũ, q)` is an admissible pair in `Ω` on `[0, T]`
+and `p` satisfies the adjoint equation and the maximum condition for some multiplier `ν ∈ ℝ`,
+then `p(t)(Y(q(t)))` is constant on `[0, T]`. Here `V` is any type with a σ-algebra, and `U`
+any subset of it. Neither `ν ≤ 0`, nor the vanishing or constancy of the Hamiltonian, nor
+`(ν, p) ≠ 0`, nor optimality is assumed.
+
+The definitions ([`OptimalControl/Defs.lean`](../OptimalControl/Defs.lean), shared with the
+Challenge):
+
+- [`IsIntegralCurveIn Y Ω x s γ`](../OptimalControl/Defs.lean#L167): `γ` is a Carathéodory
+  integral curve of `Y` from `x` in `Ω`, on the interval between `0` and `s`;
+- [`flowDomain Y Ω s`](../OptimalControl/Defs.lean#L174) and
+  [`flowMap Y Ω s`](../OptimalControl/Defs.lean#L181): the domain `D_s` of the time-`s` map
+  `e^{sY}` (the initial points of such curves), and its value, chosen among the curves (for `Y`
+  of class `C¹` they agree,
+  [`flowMap_eq_of_isIntegralCurveIn`](../OptimalControl/Pontryagin/Noether.lean#L304));
+- [`PermutesFamily f φ U σ V₁`](../OptimalControl/Defs.lean#L189): Sussmann's conditions
+  (i)–(ii). For every `u ∈ U` there are `u₁, u₂ ∈ U` with `dσ(x) f_u(x) = f_{u₁}(σ(x))`,
+  `φ_{u₁}(σ(x)) = φ_u(x)`, `dσ(x) f_{u₂}(x) = f_u(σ(x))` and `φ_u(σ(x)) = φ_{u₂}(x)` on `V₁`: the
+  controls may be permuted, and the cost is invariant;
+- [`IsSymmetry f φ Ω U σ V₁ V₂`](../OptimalControl/Defs.lean#L198): `σ` is a `C¹`
+  diffeomorphism from `V₁` onto `V₂`, open subsets of `Ω`, satisfying (i)–(ii);
+- [`IsInfinitesimalSymmetry f φ Ω U Y`](../OptimalControl/Defs.lean#L212): `Y` is `C¹` on `Ω`
+  and every `e^{sY} : D_s → D_{-s}` is a symmetry;
+- [`momentum Y x p`](../OptimalControl/Defs.lean#L220): `p(Y(x))`, Sussmann's `h_Y`.
+
+The module also proves:
+
+- the form for a Lie algebra `L` acting by infinitesimal symmetries, with the momentum map
+  `μ^τ(q(t), p(t)) ∈ L*`
+  ([`Pontryagin.noether_momentumMap`](../OptimalControl/Pontryagin/Noether.lean#L840));
+- Theorem 4.1 as Sussmann states it, for his biextremals
+  ([`Pontryagin.sussmann_theorem4_1`](../OptimalControl/Pontryagin/Noether.lean#L919));
+- the maximum principle whose multiplier makes every such momentum constant
+  ([`Pontryagin.maximum_principle_noether`](../OptimalControl/Pontryagin/Noether.lean#L943));
+- the infinitesimal symmetries given by an explicit global flow that satisfies (i)–(ii)
+  ([`Pontryagin.isInfinitesimalSymmetry_of_flow`](../OptimalControl/Pontryagin/Noether.lean#L499));
+- an example: for `ż = a z + u` on `ℂ` with `|u| ≤ 1` and cost `‖z‖² + ‖u‖²`, the rotations are
+  symmetries that permute the controls, and the angular momentum `p(i q)` is constant
+  ([`Pontryagin.noether_rotation`](../OptimalControl/Pontryagin/Noether.lean#L1006)).
+
+<details>
+<summary>The definitions in Lean</summary>
+
+```lean
+def IsIntegralCurveIn (Y : E → E) (Ω : Set E) (x : E) (s : ℝ) (γ : ℝ → E) : Prop :=
+  ContinuousOn γ [[0, s]] ∧ IntervalIntegrable (fun r ↦ Y (γ r)) volume 0 s ∧
+    (∀ r ∈ [[0, s]], γ r = x + ∫ ρ in (0 : ℝ)..r, Y (γ ρ)) ∧ ∀ r ∈ [[0, s]], γ r ∈ Ω
+
+def flowDomain (Y : E → E) (Ω : Set E) (s : ℝ) : Set E :=
+  {x | ∃ γ, IsIntegralCurveIn Y Ω x s γ}
+
+noncomputable def flowMap (Y : E → E) (Ω : Set E) (s : ℝ) (x : E) : E :=
+  if h : ∃ γ, IsIntegralCurveIn Y Ω x s γ then h.choose s else x
+
+def PermutesFamily (f : E → V → E) (φ : E → V → ℝ) (U : Set V) (σ : E → E) (V₁ : Set E) :
+    Prop :=
+  (∀ u ∈ U, ∃ u₁ ∈ U, ∀ x ∈ V₁, fderiv ℝ σ x (f x u) = f (σ x) u₁ ∧ φ (σ x) u₁ = φ x u) ∧
+    ∀ u ∈ U, ∃ u₂ ∈ U, ∀ x ∈ V₁, fderiv ℝ σ x (f x u₂) = f (σ x) u ∧ φ (σ x) u = φ x u₂
+
+structure IsSymmetry (f : E → V → E) (φ : E → V → ℝ) (Ω : Set E) (U : Set V) (σ : E → E)
+    (V₁ V₂ : Set E) : Prop where
+  isOpen_left : IsOpen V₁
+  isOpen_right : IsOpen V₂
+  left_subset : V₁ ⊆ Ω
+  right_subset : V₂ ⊆ Ω
+  bijOn : BijOn σ V₁ V₂
+  contDiffOn : ContDiffOn ℝ 1 σ V₁
+  contDiffOn_invFunOn : ContDiffOn ℝ 1 (Function.invFunOn σ V₁) V₂
+  permutesFamily : PermutesFamily f φ U σ V₁
+
+structure IsInfinitesimalSymmetry (f : E → V → E) (φ : E → V → ℝ) (Ω : Set E) (U : Set V)
+    (Y : E → E) : Prop where
+  contDiffOn : ContDiffOn ℝ 1 Y Ω
+  isSymmetry : ∀ s : ℝ,
+    IsSymmetry f φ Ω U (flowMap Y Ω s) (flowDomain Y Ω s) (flowDomain Y Ω (-s))
+
+def momentum (Y : E → E) (x : E) (p : StrongDual ℝ E) : ℝ :=
+  p (Y x)
+```
+
+`[[0, s]]` is the interval between `0` and `s` (`Set.uIcc`).
 </details>
 
 ## Filippov's theorem and the existence of optimal controls
@@ -331,13 +438,29 @@ Filippov's theorem is proved by the standard argument: the trajectories are equi
 cluster point exists by Tychonoff's theorem, its derivative lies in the convex velocity set almost
 everywhere, and a measurable control realizing it is found by measurable selection.
 
+Noether's theorem follows Sussmann's proof of his Theorem 3.1, applied to the cotangent lift
+`ρ_s(x, p) = (e^{sY}(x), p ∘ (De^{sY}(x))⁻¹)` of the flow of `Y` (departure S4).
+
+1. **Cotangent lift.** For a symmetry `σ` and `u ∈ U`, the `u₂` of (i)–(ii) gives
+   `H(σ(x), p ∘ dσ(x)⁻¹, u) = H(x, p, u₂)`
+   ([`IsSymmetry.controlHamiltonian_cotangentLift`](../OptimalControl/Pontryagin/Noether.lean#L576)).
+2. **The flow at `s = 0`.** Near `x`, `Y` equals a bounded `C¹` field, whose flow is `e^{sY}`
+   for small `s`. So `e^{sY}(x)` has derivative `Y(x)` at `s = 0`, and `De^{sY}(x)`, the
+   resolvent of the variational equation, has derivative `DY(x)`
+   ([`hasDerivAt_fderiv_flowMap_zero`](../OptimalControl/Pontryagin/Noether.lean#L427)).
+3. **The bracket vanishes.** If `u` maximizes `H(x, p, ·)`, then `s ↦ H(ρ_s(x, p), u)` has a
+   maximum at `s = 0`, so its derivative `p([Y, f_u](x)) + ν Dφ_u(x) Y(x)` vanishes
+   ([`IsInfinitesimalSymmetry.bracket_eq_zero`](../OptimalControl/Pontryagin/Noether.lean#L609)).
+4. **The momentum is constant.** `t ↦ p(t)(Y(q(t)))` is absolutely continuous, and at almost
+   every `t` its derivative is minus the bracket of step 3, hence `0`.
+
 ## Files
 
 | Path | Content |
 | --- | --- |
 | [`OptimalControl.lean`](../OptimalControl.lean) | imports the whole library |
-| [`OptimalControl/Pontryagin.lean`](../OptimalControl/Pontryagin.lean) | imports the maximum principle, and through it every other module |
-| [`OptimalControl/Defs.lean`](../OptimalControl/Defs.lean) | the definitions that the statements of record use (shared with the Challenge): admissible pairs, attainable sets, `IsC1On`, cost, Hamiltonian, the adjoint equation, the maximum condition, strong local minimizers |
+| [`OptimalControl/Pontryagin.lean`](../OptimalControl/Pontryagin.lean) | imports the maximum principle and Noether's theorem, and through them the modules they use |
+| [`OptimalControl/Defs.lean`](../OptimalControl/Defs.lean) | the definitions that the statements of record use (shared with the Challenge): admissible pairs, attainable sets, `IsC1On`, cost, Hamiltonian, the adjoint equation, the maximum condition, strong local minimizers; integral curves and flows, symmetries, infinitesimal symmetries, momentum |
 | [`OptimalControl/MeasureTheory/MeasurableSelection.lean`](../OptimalControl/MeasureTheory/MeasurableSelection.lean) | measurable selection of zeros of Carathéodory functions on a compact set; measurability of `{t \| ∃ w ∈ C, g t w = 0}` |
 | [`OptimalControl/MeasureTheory/LebesguePoints.lean`](../OptimalControl/MeasureTheory/LebesguePoints.lean) | Lebesgue points of a function within an interval: almost every point is one, and they are dense |
 | [`OptimalControl/ODE/ControlSystem.lean`](../OptimalControl/ODE/ControlSystem.lean) | Filippov's theorem, existence of optimal controls; the fundamental theorem of calculus for Lipschitz curves |
@@ -355,6 +478,7 @@ everywhere, and a measurable control realizing it is found by measurable selecti
 | [`OptimalControl/Pontryagin/FreeTime.lean`](../OptimalControl/Pontryagin/FreeTime.lean) | Theorem 12.2 (free time) |
 | [`OptimalControl/Pontryagin/IntegralCost.lean`](../OptimalControl/Pontryagin/IntegralCost.lean) | Theorems 12.3–12.5 (integral cost, fixed time, boundary conditions) |
 | [`OptimalControl/Pontryagin/MaximumPrinciple.lean`](../OptimalControl/Pontryagin/MaximumPrinciple.lean) | the maximum principle with free time, cost and mixed boundary conditions |
+| [`OptimalControl/Pontryagin/Noether.lean`](../OptimalControl/Pontryagin/Noether.lean) | Noether's theorem for optimal control (Sussmann, Theorem 4.1): flows of `C¹` fields, the cotangent lift of a symmetry, the vanishing bracket, the conserved momentum; the Lie-algebra form, Sussmann's form for biextremals, the corollary of the maximum principle; symmetries from explicit flows, rotations of the plane |
 | [`OptimalControlChallenge.lean`](../OptimalControlChallenge.lean), [`OptimalControlSolution.lean`](../OptimalControlSolution.lean), [`comparator.json`](../comparator.json), [`formalization.yaml`](../formalization.yaml) | the statements of record, their proofs, Comparator's configuration, the metadata (Palomar) |
 | [`scripts/Audit.lean`](../scripts/Audit.lean) | the axiom audit |
 | [`scripts/sync_challenge_defs.py`](../scripts/sync_challenge_defs.py) | copies the shared definitions into the Challenge (`--check`: checks the copy) |

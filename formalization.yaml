@@ -2,37 +2,44 @@
 version: "v0.4"
 
 project:
-  name: "The Pontryagin maximum principle and Filippov's theorem"
+  name: "The Pontryagin maximum principle, Filippov's theorem and Noether's theorem for optimal control"
   description: >-
-    A Lean 4 formalization, with Mathlib, of the Pontryagin maximum principle and of Filippov's
-    theorem, following A. A. Agrachev and Yu. L. Sachkov, Control Theory from the Geometric
-    Viewpoint (Encyclopaedia of Mathematical Sciences 87, Springer, 2004), Chapter 12 and Theorem
-    10.1. Control systems q' = f(q, u) live on an open subset of a finite-dimensional real normed
-    space, with measurable controls taking values in a compact set and trajectories in the sense
-    of Caratheodory.
+    A Lean 4 formalization, with Mathlib, of three results of optimal control: the Pontryagin
+    maximum principle and Filippov's theorem, following A. A. Agrachev and Yu. L. Sachkov, Control
+    Theory from the Geometric Viewpoint (Encyclopaedia of Mathematical Sciences 87, Springer,
+    2004), Chapter 12 and Theorem 10.1, and Noether's theorem for optimal control, following H. J.
+    Sussmann, Symmetries and integrals of motion in optimal control (Banach Center Publications 32,
+    1995), Theorem 4.1. Control systems q' = f(q, u) live on an open subset of a finite-dimensional
+    real normed space, with measurable controls and trajectories in the sense of Caratheodory.
 
 
-    The main result is the maximum principle with free terminal time, an integral cost and mixed
-    boundary conditions (q(0), q(T)) in N, for strong local minimizers, with C^1 data: there are
-    nu <= 0 and a Lipschitz covector curve p, with (nu, p(t)) nonzero for every t, that satisfy the
-    adjoint equation, the maximum condition and the vanishing of the Hamiltonian for almost every
-    t, and the transversality condition. Agrachev and Sachkov leave this case to the reader; their
-    Lemmas 12.1 and 12.2 and Theorems 12.1-12.5 (the geometric maximum principle, free time without
-    cost, and integral costs with fixed, separated and mixed boundary conditions) are proved too.
-    Filippov's theorem: for a continuous control system with compact control set, convex velocity
-    sets and bounded velocities, the attainable sets at time T and up to time T are compact; hence
-    optimal controls exist for integral costs whose extended velocity sets are convex, with fixed
-    or free terminal time. Both results are also proved, by the same argument, for problems posed
-    on part of the space: trajectories confined to a closed set S (the dynamics and the cost need
-    only be continuous, the velocities bounded and the velocity sets convex on S x U), starting in
-    a compact set, with initial and terminal points in a closed relation, and terminal times in a
-    window [T0, T1].
+    The maximum principle is proved with free terminal time, an integral cost and mixed boundary
+    conditions (q(0), q(T)) in N, for strong local minimizers, with C^1 data and a compact control
+    set: there are nu <= 0 and a Lipschitz covector curve p, with (nu, p(t)) nonzero for every t,
+    that satisfy the adjoint equation, the maximum condition and the vanishing of the Hamiltonian
+    for almost every t, and the transversality condition. Agrachev and Sachkov leave this case to
+    the reader; their Lemmas 12.1 and 12.2 and Theorems 12.1-12.5 (the geometric maximum principle,
+    free time without cost, and integral costs with fixed, separated and mixed boundary conditions)
+    are proved too. Filippov's theorem: for a continuous control system with compact control set,
+    convex velocity sets and bounded velocities, the attainable sets at time T and up to time T are
+    compact; hence optimal controls exist for integral costs whose extended velocity sets are
+    convex, with fixed or free terminal time. Both results are also proved, by the same argument,
+    for problems posed on part of the space: trajectories confined to a closed set S (the dynamics
+    and the cost need only be continuous, the velocities bounded and the velocity sets convex on
+    S x U), starting in a compact set, with initial and terminal points in a closed relation, and
+    terminal times in a window [T0, T1]. Noether's theorem: if every map of the flow of a C^1
+    vector field Y is a symmetry of the system that leaves the cost invariant (it may permute the
+    controls), the momentum p(t)(Y(q(t))) is constant along every pair (q, p) that satisfies the
+    adjoint equation and the maximum condition, for any multiplier and any set of control values.
+    Sussmann's Theorem 4.1, for a Lie algebra acting by such symmetries and his biextremals,
+    follows, and so does a maximum principle whose multiplier keeps every such momentum constant.
 
 
     Everything the proofs use is proved: existence, uniqueness and differentiable dependence of
-    Caratheodory solutions, the variations formula and needle variations, Lebesgue points, and
-    measurable selection (Kuratowski-Ryll-Nardzewski). Brouwer's fixed-point theorem is taken from
-    the separate Lean package FixedPoint. No axiom beyond Lean's standard three is used.
+    Caratheodory solutions, the variations formula and needle variations, Lebesgue points,
+    measurable selection (Kuratowski-Ryll-Nardzewski), and the flows of C^1 vector fields with
+    their derivative at time 0. Brouwer's fixed-point theorem is taken from the separate Lean
+    package FixedPoint. No axiom beyond Lean's standard three is used.
   authors:
     - "The-Anh Vu-Le"
   license: "Apache-2.0"
@@ -41,7 +48,7 @@ project:
 
 classification:
   arxiv: ["math.OC"]
-  msc2020: ["49K15", "49J15", "93B03", "93C15", "34A12"]
+  msc2020: ["49K15", "49J15", "93B03", "93C15", "34A12", "70H33"]
 
 sources:
   - title: "Control Theory from the Geometric Viewpoint"
@@ -62,6 +69,26 @@ sources:
       mixed boundary conditions that the remarks after Theorems 12.3-12.5 leave to the reader) and
       Theorem 10.1 (Filippov's theorem), with the existence of optimal controls for integral costs
       that follows from it. The readings and departures D1-D11 are listed under fidelity.
+    author_endorsement: "not-contacted"
+  - title: "Symmetries and integrals of motion in optimal control"
+    authors:
+      - "H. J. Sussmann"
+    id: "https://eudml.org/doc/262687"
+    type: "article"
+    location: >-
+      Geometry in Nonlinear Control and Differential Inclusions, Banach Center Publications 32,
+      Institute of Mathematics, Polish Academy of Sciences, Warszawa, 1995, pp. 379-393; Theorem
+      4.1 (p. 389)
+    relationship: "formalizes"
+    note: >-
+      Formalized: the definitions of Section 4 (symmetries of an optimal control system, their
+      infinitesimal groups, the momentum map, controlled biextremals) and Theorem 4.1, the
+      control version of Noether's theorem, as stated there (Pontryagin.sussmann_theorem4_1) and
+      in a one-vector-field form under weaker hypotheses that is the statement of record
+      (Pontryagin.noether). Sections 2-3 (Noether's theorem on a symplectic manifold, Theorems
+      3.1-3.2) are not formalized as such: their argument is applied directly to the cotangent
+      lift of a symmetry (S4). Section 5 is not formalized. Page numbers are those of the
+      published paper. The readings S1-S8 are listed under fidelity.
     author_endorsement: "not-contacted"
   - title: "Principles of Optimal Control Theory"
     authors:
@@ -97,16 +124,22 @@ status:
     points, a closed endpoint relation and a window of terminal times
     (ControlSystem.isCompact_constrainedEndpoints, ControlSystem.exists_optimal_constrained);
     Proposition 11.3 and the variations formula (12.13), read pointwise along trajectories (D2);
-    and the Caratheodory theory that the source cites (D11). The Challenge states the maximum principle
-    (free time, cost, mixed boundary conditions), Filippov's theorem in both forms and the
-    existence of optimal controls in both forms; Theorems 12.1-12.5 (Pontryagin.theorem12_1 to
-    theorem12_5) and the forms of Filippov's theorem and of the existence of optimal controls with
-    a state constraint are proved in the library but are not part of the Challenge. Not formalized: the
-    setting of manifolds (the state space is an open subset of a finite-dimensional real normed
-    space, D1), the chronological calculus as such (D2), and the other results and chapters of the
-    book. Brouwer's fixed-point theorem comes from the FixedPoint package, a dependency of the
-    proofs only (D10). Nothing is assumed: there is no sorry and no axiom, and the axiom audit
-    (scripts/Audit.lean) checks every declaration of the library.
+    and the Caratheodory theory that the source cites (D11). From Sussmann's paper: the
+    definitions of Section 4 and Theorem 4.1 (Pontryagin.sussmann_theorem4_1), with its
+    one-vector-field form under weaker hypotheses (Pontryagin.noether), its Lie-algebra form
+    (Pontryagin.noether_momentumMap) and the maximum principle with Noether's integrals of motion
+    (Pontryagin.maximum_principle_noether). The Challenge states the maximum principle (free time,
+    cost, mixed boundary conditions), Filippov's theorem in both forms, the existence of optimal
+    controls in both forms, and Noether's theorem in its one-vector-field form; Theorems 12.1-12.5
+    (Pontryagin.theorem12_1 to theorem12_5), the forms with a state constraint and Sussmann's own
+    form of Theorem 4.1 are proved in the library but are not part of the Challenge. Not
+    formalized: the setting of manifolds (the state space is an open subset of a finite-dimensional
+    real normed space, D1 and S1), the chronological calculus as such (D2), the other results and
+    chapters of the book, and Sections 2-3 (Noether's theorem on a symplectic manifold, whose
+    argument is applied directly to the cotangent lift, S4) and 5 of Sussmann's paper. Brouwer's
+    fixed-point theorem comes from the FixedPoint package, a dependency of the proofs only (D10).
+    Nothing is assumed: there is no sorry and no axiom, and the axiom audit (scripts/Audit.lean)
+    checks every declaration of the library.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
@@ -201,6 +234,47 @@ fidelity:
     (OptimalControl/ODE/NeedleVariation.lean).
 
 
+    Readings and departures from Sussmann (docs/SUSSMANN.md, "Readings and departures from
+    Sussmann"). S1: as D1, the manifold M is an open subset Omega of E, T*M = Omega x E*, and the
+    adjoint equation (4.3) is read as Hamilton's equations x' = dH/dz = f_u(x), z' = -dH/dx, in
+    integral form. S2: the symmetries and the vector fields tau(X) are C^1 instead of C^infinity (a
+    generalization); the system keeps Sussmann's class C^1, and U need not be compact. S3: the
+    time-s map e^{sY} is defined through the Caratheodory integral curves of Y in Omega, its
+    domain D_s being the set of their initial points and its value chosen among them; for C^1
+    fields they agree (Pontryagin.flowMap_eq_of_isIntegralCurveIn). S4 (a departure): the proof
+    differentiates the cotangent lift rho_s(x, z) = (e^{sY}(x), z o (De^{sY}(x))^{-1}) itself, with
+    the steps of Sussmann's proof of Theorem 3.1, rather than identifying it with the flow of the
+    Hamiltonian field of h_Y (only continuous for C^1 fields Y), which would cost more. S5: the
+    one-field theorem
+    (Pontryagin.noether) assumes only the adjoint equation and the maximum condition, for any real
+    multiplier (a generalization): neither c >= 0, nor the constancy of the minimized Hamiltonian
+    in (4.4), nor the nontriviality (EAV3), nor optimality. S6: Sussmann minimizes
+    H^c_u = <z, f_u> + c f^0_u with c >= 0, the package maximizes H^nu_u = <p, f_u> + nu phi_u with
+    nu <= 0; (p, nu) = (-zeta, -c) translates one into the other. S7: admissible controls are the
+    package's admissible pairs on [0, T]; in Noether's theorem the control values form any type
+    with a sigma-algebra, and with the trivial one every control is measurable, so Sussmann's
+    arbitrary U is covered; his Lipschitz-Caratheodory condition is dropped (a generalization).
+    S8: L is any real Lie algebra, L* its algebraic dual, and tau is linear and satisfies the
+    bracket condition with Mathlib's bracket of vector fields (for which tau(A)x = Ax is an
+    anti-homomorphism on matrices); the bracket condition is not used. Further readings: Sussmann's u1 and u2 are asked for separately, which is the
+    same condition; the inverse of a symmetry is Function.invFunOn; the constant minimum of (4.4)
+    is a constant attained almost everywhere. The statement of record is the library's
+    Pontryagin.noether, word for word.
+
+
+    Gaps found in Sussmann (docs/SUSSMANN.md, "Gaps in Sussmann"). p. 390: the proof of Theorem
+    4.1 asserts without proof that T*(tau) is an infinitesimal group of symmetries of H^c(P) (the
+    flow of the Hamiltonian field of h_{tau(X)} is the cotangent lift of e^{s tau(X)}, and each
+    cotangent lift is a symmetry of the Hamiltonian family); the half that the theorem uses,
+    H_u o rho_s = H_{u2}, and the derivative of rho_s at s = 0 are proved. pp. 380-381 and 388: the symplectic form of T*M is
+    not specified, so the sign of Hamilton's equations is ambiguous; (4.3) is read as Hamilton's
+    equations (S1). Typos: on p. 384, mu(x, z) = <z, theta(X)(x)> should read
+    mu(x, z)(X) = <z, tau(X)(x)>; on p. 385, the sets of Hamiltonian vectors lie in T_x N, not
+    T_x M. Hypotheses of Theorem 4.1 that the proof does not use: c >= 0, the constancy in (4.4),
+    (EAV3), smoothness beyond C^1, the bracket condition on tau, the u1 halves of conditions
+    (i)-(ii), and the measurability of the controls.
+
+
     Proofs: the maximum principle, Lemmas 12.1-12.2 and Theorems 12.1-12.5 follow Agrachev and
     Sachkov's proofs, with the departures D2 and D6-D11 and the repairs of the gaps above; Lemma
     12.1 is proved as they prove it (the rescaled maps converge uniformly, by Ascoli's lemma, to
@@ -209,7 +283,11 @@ fidelity:
     theorem, its derivative lies in the convex velocity set almost everywhere, and a measurable
     control realizing it is found by measurable selection. The forms with a state constraint follow
     the same proof: a limit of trajectories confined to the closed set S stays in S, so continuity
-    and convexity are needed only on S x U.
+    and convexity are needed only on S x U. Noether's theorem follows Sussmann's proof of his
+    Theorem 3.1 on the cotangent lift (S4): the lift of a symmetry carries H_u to H_{u2}, so at a
+    maximizing control the function s -> H_u(rho_s(x, p)) has a maximum at s = 0 and its
+    derivative, the Poisson bracket of h_Y and H_u, vanishes; the momentum along an extremal is
+    absolutely continuous with this bracket as derivative almost everywhere, hence constant.
 
 review:
   status: "agent-reviewed"
@@ -217,7 +295,8 @@ review:
     - "none (no human review)"
   notes: >-
     Before the proofs were written, an independent agent reviewed the statements of Chapter 12
-    against Agrachev and Sachkov's draft; afterwards, independent agents compared the proofs with
+    against Agrachev and Sachkov's draft, and another the statements of Noether's theorem against
+    Sussmann's paper; afterwards, independent agents compared the proofs with
     the book's, and the departures they found that were not forced were removed
     (docs/AGRACHEV_SACHKOV.md, "Readings and departures from Agrachev–Sachkov"). No person has
     reviewed the proofs or the statements. Lean's kernel has checked the proofs; Comparator (with
@@ -275,6 +354,22 @@ alignment:
         Under the same hypotheses, among the admissible pairs from x0 to x1 on [0, tau] with
         tau in [0, T] (if any), one has the least cost int_0^tau phi(x, u). Library:
         ControlSystem.exists_optimal_freeTime.
+    - source: "Sussmann, Theorem 4.1 (p. 389), for one vector field, under weaker hypotheses"
+      lean: "OptimalControlChallenge.noether"
+      module: "OptimalControlChallenge"
+      status: "proved"
+      note: >-
+        For an optimal control system (Omega, U, f, phi) with f(., u) and phi(., u) of class C^1 on
+        the open set Omega (S1, S2), any set U of control values (S7), and a C^1 vector field Y
+        every time-s map of whose flow on Omega is a C^1 diffeomorphism between open subsets of
+        Omega satisfying Sussmann's conditions (i)-(ii) (the maps carry the vector fields f_u and
+        the costs phi_u into themselves, possibly permuting the controls; S3): along every
+        admissible pair (u~, q) on [0, T] with a covector curve p that satisfies the adjoint
+        equation and the maximum condition for some real multiplier nu, the momentum
+        p(t)(Y(q(t))) is constant on [0, T]. Sussmann states the theorem for a Lie algebra acting
+        by such fields and for his biextremals (minimization convention with c >= 0, constant
+        minimized Hamiltonian, nontriviality); that form follows (S5, S6, S8). Library:
+        Pontryagin.noether; Sussmann's form: Pontryagin.sussmann_theorem4_1.
 
 acknowledgements: >-
   Mathlib and the Lean toolchain; Brouwer's fixed-point theorem from the FixedPoint package

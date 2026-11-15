@@ -6,30 +6,34 @@ public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 public import Mathlib.Topology.EMetricSpace.Lipschitz
 
 /-!
-# Challenge: the Pontryagin maximum principle and Filippov's theorem
+# Challenge: the maximum principle, Filippov's theorem and Noether's theorem
 
 Statements of record of the package `OptimalControl`: the **Pontryagin maximum principle** with
 free terminal time, an integral cost and mixed boundary conditions, for strong local minimizers
 (`maximum_principle`), proved by the argument of A. A. Agrachev and Yu. L. Sachkov, *Control
 Theory from the Geometric Viewpoint* (Encyclopaedia of Mathematical Sciences 87, Springer, 2004),
 Chapter 12; **Filippov's theorem** on the compactness of attainable sets (their Theorem 10.1;
-`isCompact_reachableSet`, `isCompact_reachableSetLE`); and the **existence of optimal controls**
-for integral costs that follows from it (`exists_optimal_fixedTime`, `exists_optimal_freeTime`).
+`isCompact_reachableSet`, `isCompact_reachableSetLE`); the **existence of optimal controls** for
+integral costs that follows from it (`exists_optimal_fixedTime`, `exists_optimal_freeTime`); and
+**Noether's theorem for optimal control** (`noether`), Theorem 4.1 of H. J. Sussmann, *Symmetries
+and integrals of motion in optimal control* (Banach Center Publications 32, 1995, pp. 379–393).
 This file imports only Mathlib. The definitions between the two markers are copied word for word
 from the library module `OptimalControl/Defs.lean` (`scripts/sync_challenge_defs.py`), so that
 the Challenge and the Solution use the same constants. Page numbers refer to the authors' draft of
-the book (preface September 2003); `docs/AGRACHEV_SACHKOV.md` lists the departures D1–D11.
+Agrachev and Sachkov's book (preface September 2003) and to Sussmann's published paper;
+`docs/AGRACHEV_SACHKOV.md` lists the departures D1–D11, `docs/SUSSMANN.md` the readings S1–S8.
 
 ## Conventions
 
 * `E` (states) is a finite-dimensional real normed space. In the maximum principle the control
   values lie in a finite-dimensional real normed space `V` and the boundary constraint takes
   values in a finite-dimensional real normed space `Q`; in Filippov's theorem `V` is a metric
-  space. `V` carries its Borel σ-algebra. In the maximum principle, Agrachev and Sachkov's
-  manifold `M` is an open set `Ω ⊆ E` (departure D1); in Filippov's theorem the states range over
-  `E`.
+  space; in both, `V` carries its Borel σ-algebra. In Noether's theorem `V` is any type with a
+  σ-algebra. In the maximum principle and in Noether's theorem, the manifold `M` of the sources is
+  an open set `Ω ⊆ E` (D1 and S1); in Filippov's theorem the states range over `E`.
 * Time runs over `[0, T]` (`Icc 0 T`). A *control* is a measurable `u : ℝ → V` with `u(t) ∈ U` for
-  `t ∈ [0, T]`, for a compact control set `U`. An *admissible pair* `(u, x)` from `x₀` on `[0, T]`
+  `t ∈ [0, T]`, for a control set `U ⊆ V`, compact in the maximum principle and in Filippov's
+  theorem and arbitrary in Noether's theorem. An *admissible pair* `(u, x)` from `x₀` on `[0, T]`
   for `x' = F(x, u)` (`ControlSystem.IsAdmissible`) is a control `u` and a Carathéodory trajectory
   `x`: `x` is continuous on `[0, T]`, `t ↦ F(x(t), u(t))` is integrable on `[0, T]`, and
   `x(t) = x₀ + ∫₀ᵗ F(x(s), u(s)) ds` for `t ∈ [0, T]`. Values outside `[0, T]` play no role.
@@ -90,6 +94,29 @@ compact, `‖F‖ ≤ M` on `E × U`, and convex extended velocity sets `{(F(x, 
 among the admissible pairs from `x₀` that reach an attainable `x₁` at time `T ≥ 0` (or at some
 time `τ ∈ [0, T]`), one has the least cost `∫₀ᵀ φ(x, u)` (or `∫₀^τ φ(x, u)`). The proof applies
 Filippov's theorem to the system extended by the cost.
+
+## Noether's theorem (`noether`)
+
+Sussmann's optimal control system `(M, U, f, f⁰)` is `(Ω, U, f, φ)`, with `f(·, u)` and `φ(·, u)`
+of class `C¹` on the open set `Ω` for every `u ∈ U`. The integral curves of a vector field
+`Y : E → E` are taken in `Ω`, in Carathéodory form (`IsIntegralCurveIn`), and the time-`s` map
+`e^{sY}` (`flowMap`) is defined on the set `D_s` of their initial points (`flowDomain`). A
+*symmetry* (`IsSymmetry`, Sussmann p. 389) is a `C¹` diffeomorphism `σ : V₁ → V₂` between open
+subsets of `Ω` that maps the family `{(f_u, φ_u) | u ∈ U}` into itself in both directions,
+possibly permuting the controls (`PermutesFamily`): for every `u ∈ U` there are `u₁, u₂ ∈ U` with
+`dσ(x) f_u(x) = f_{u₁}(σ(x))`, `φ_{u₁}(σ(x)) = φ_u(x)`, `dσ(x) f_{u₂}(x) = f_u(σ(x))` and
+`φ_u(σ(x)) = φ_{u₂}(x)` for `x ∈ V₁`; so the cost is invariant. An *infinitesimal symmetry*
+(`IsInfinitesimalSymmetry`) is a `C¹` field `Y` on `Ω` every `e^{sY} : D_s → D_{-s}` of which is a
+symmetry; its momentum is `h_Y(x, p) = p(Y(x))` (`momentum`).
+
+Statement: if `Y` is an infinitesimal symmetry and `(ũ, q)` is an admissible pair in `Ω` on
+`[0, T]` with a covector curve `p` that satisfies the adjoint equation (`IsAdjoint`) and the
+maximum condition (`IsMaximal`) of the maximum principle for some multiplier `ν ∈ ℝ`, then
+`p(t)(Y(q(t))) = p(0)(Y(q(0)))` for every `t ∈ [0, T]`. This is Sussmann's Theorem 4.1 (p. 389)
+for one vector field, under weaker hypotheses: `ν` is any real number (Sussmann minimizes, with
+`(ζ, c)`, `c ≥ 0`, which is `(p, ν) = (-ζ, -c)` here), the Hamiltonian need not be constant nor
+`(p, ν)` nonzero, and `Y` is `C¹` rather than `C^∞`. His form, for a Lie algebra acting by
+infinitesimal symmetries, follows by applying it to each field of the action.
 -/
 
 @[expose] public section
@@ -207,6 +234,75 @@ def IsStrongLocalMinimizer (f : E → V → E) (φ : E → V → ℝ) (Ω : Set 
       IsAdmissibleIn f Ω U (q' 0) T' u' q' → (q' 0, q' T') ∈ N → |T' - T| < ε →
       (∀ σ ∈ Icc (0 : ℝ) 1, ‖q' (σ * T') - q (σ * T)‖ < ε) → cost φ T u q ≤ cost φ T' u' q'
 
+section Symmetry
+
+/-! The objects of Noether's theorem (Sussmann, §4, pp. 387–389), in coordinates (S1). -/
+
+open scoped Interval
+
+/-- An integral curve of the vector field `Y` in `Ω` from `x` on the interval between `0` and `s`,
+in the Carathéodory form of `ControlSystem.IsSolution` for the autonomous system `y' = Y(y)`:
+`γ` is continuous on `[[0, s]]`, `r ↦ Y(γ(r))` is integrable there,
+`γ(r) = x + ∫₀ʳ Y(γ(ρ)) dρ` and `γ(r) ∈ Ω` for `r ∈ [[0, s]]`. For `Y` continuous on `Ω` these
+are the classical integral curves (`γ` is `C¹` with `γ' = Y ∘ γ`). -/
+def IsIntegralCurveIn (Y : E → E) (Ω : Set E) (x : E) (s : ℝ) (γ : ℝ → E) : Prop :=
+  ContinuousOn γ [[0, s]] ∧ IntervalIntegrable (fun r ↦ Y (γ r)) volume 0 s ∧
+    (∀ r ∈ [[0, s]], γ r = x + ∫ ρ in (0 : ℝ)..r, Y (γ ρ)) ∧ ∀ r ∈ [[0, s]], γ r ∈ Ω
+
+/-- The domain `D_s` of the time-`s` map `e^{sY}` of the flow of `Y` on `Ω` (Sussmann, p. 381:
+"the domain of `e^{tX}` ..., which need not be the whole manifold"): the points of `Ω` from which
+an integral curve of `Y` in `Ω` runs on the interval between `0` and `s` (S3). -/
+def flowDomain (Y : E → E) (Ω : Set E) (s : ℝ) : Set E :=
+  {x | ∃ γ, IsIntegralCurveIn Y Ω x s γ}
+
+open Classical in
+/-- The time-`s` map `e^{sY}` of the flow of `Y` on `Ω` (S3): the value at time `s` of an integral
+curve of `Y` in `Ω` from `x`, chosen among them (they agree for `Y` of class `C¹`,
+`Pontryagin.flowMap_eq_of_isIntegralCurveIn`); `x` itself outside `flowDomain Y Ω s`. -/
+noncomputable def flowMap (Y : E → E) (Ω : Set E) (s : ℝ) (x : E) : E :=
+  if h : ∃ γ, IsIntegralCurveIn Y Ω x s γ then h.choose s else x
+
+/-- Conditions (i)–(ii) of Sussmann's definition of a symmetry (p. 389), for a map `σ` on `V₁`:
+for every `u ∈ U` there is `u₁ ∈ U` with `dσ(x) f_u(x) = f_{u₁}(σ(x))` and
+`f⁰_{u₁}(σ(x)) = f⁰_u(x)` on `V₁` (`σ` maps `(f_u, f⁰_u)` to `(f_{u₁}, f⁰_{u₁})`), and there is
+`u₂ ∈ U` with `dσ(x) f_{u₂}(x) = f_u(σ(x))` and `f⁰_u(σ(x)) = f⁰_{u₂}(x)` on `V₁` (`σ⁻¹` maps
+`(f_u, f⁰_u)` to `(f_{u₂}, f⁰_{u₂})`). The controls may be permuted; the cost is invariant. -/
+def PermutesFamily (f : E → V → E) (φ : E → V → ℝ) (U : Set V) (σ : E → E) (V₁ : Set E) :
+    Prop :=
+  (∀ u ∈ U, ∃ u₁ ∈ U, ∀ x ∈ V₁, fderiv ℝ σ x (f x u) = f (σ x) u₁ ∧ φ (σ x) u₁ = φ x u) ∧
+    ∀ u ∈ U, ∃ u₂ ∈ U, ∀ x ∈ V₁, fderiv ℝ σ x (f x u₂) = f (σ x) u ∧ φ (σ x) u = φ x u₂
+
+/-- **A symmetry of the optimal control system `(Ω, U, f, φ)`** (Sussmann, p. 389): a
+diffeomorphism `σ : V₁ → V₂` between open subsets of `Ω`, here of class `C¹` (S2: `σ` maps `V₁`
+bijectively onto `V₂`, is `C¹` on `V₁`, and its inverse is `C¹` on `V₂`), satisfying (i)–(ii)
+(`PermutesFamily`). -/
+structure IsSymmetry (f : E → V → E) (φ : E → V → ℝ) (Ω : Set E) (U : Set V) (σ : E → E)
+    (V₁ V₂ : Set E) : Prop where
+  isOpen_left : IsOpen V₁
+  isOpen_right : IsOpen V₂
+  left_subset : V₁ ⊆ Ω
+  right_subset : V₂ ⊆ Ω
+  bijOn : BijOn σ V₁ V₂
+  contDiffOn : ContDiffOn ℝ 1 σ V₁
+  contDiffOn_invFunOn : ContDiffOn ℝ 1 (Function.invFunOn σ V₁) V₂
+  permutesFamily : PermutesFamily f φ U σ V₁
+
+/-- **An infinitesimal symmetry** of `(Ω, U, f, φ)`: a vector field `Y` on `Ω`, here of class `C¹`
+(Sussmann: smooth; S2), every time-`s` map `e^{sY} : D_s → D_{-s}` of which, `s ∈ ℝ`, is a
+symmetry (Sussmann, p. 389: "every diffeomorphism `e^{tτ(X)}` is a symmetry of `P`"). -/
+structure IsInfinitesimalSymmetry (f : E → V → E) (φ : E → V → ℝ) (Ω : Set E) (U : Set V)
+    (Y : E → E) : Prop where
+  contDiffOn : ContDiffOn ℝ 1 Y Ω
+  isSymmetry : ∀ s : ℝ,
+    IsSymmetry f φ Ω U (flowMap Y Ω s) (flowDomain Y Ω s) (flowDomain Y Ω (-s))
+
+/-- The momentum of a vector field `Y`, `h_Y(x, p) = ⟨p, Y(x)⟩` on `T*Ω = Ω × E*` (Sussmann,
+p. 384: "every vector field `X` gives rise to a smooth function `h_X` on `T*M`"). -/
+def momentum (Y : E → E) (x : E) (p : StrongDual ℝ E) : ℝ :=
+  p (Y x)
+
+end Symmetry
+
 end Pontryagin
 
 -- END SHARED DEFINITIONS
@@ -292,6 +388,21 @@ theorem exists_optimal_freeTime {E V : Type*} [NormedAddCommGroup E] [NormedSpac
     ∃ τ ∈ Icc 0 T, ∃ u x, IsAdmissible F U x₀ τ u x ∧ x τ = x₁ ∧
       ∀ τ' ∈ Icc 0 T, ∀ u' x', IsAdmissible F U x₀ τ' u' x' → x' τ' = x₁ →
         ∫ t in (0 : ℝ)..τ, φ (x t) (u t) ≤ ∫ t in (0 : ℝ)..τ', φ (x' t) (u' t) := by
+  sorry
+
+/-- **Noether's theorem for optimal control** (Sussmann, Theorem 4.1, for one vector field): if
+`Y` is an infinitesimal symmetry of the optimal control system `(Ω, U, f, φ)` of class `C¹`, then
+along every admissible pair `(ũ, q)` with a covector curve `p` that satisfies the adjoint equation
+and the maximum condition for some multiplier `ν`, the momentum `p(t)(Y(q(t)))` is constant on
+`[0, T]`. -/
+theorem noether {E V : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+    [MeasurableSpace V] {Ω : Set E} (hΩ : IsOpen Ω) {U : Set V} {f : E → V → E}
+    {φ : E → V → ℝ} (hf : ∀ u ∈ U, ContDiffOn ℝ 1 (f · u) Ω)
+    (hφ : ∀ u ∈ U, ContDiffOn ℝ 1 (φ · u) Ω) {Y : E → E}
+    (hY : IsInfinitesimalSymmetry f φ Ω U Y) {T ν : ℝ} {ũ : ℝ → V} {q : ℝ → E}
+    {p : ℝ → StrongDual ℝ E} (href : IsAdmissibleIn f Ω U (q 0) T ũ q)
+    (hadj : IsAdjoint f φ ν ũ q T p) (hmax : IsMaximal f φ ν U ũ q T p) :
+    ∀ t ∈ Icc 0 T, momentum Y (q t) (p t) = momentum Y (q 0) (p 0) := by
   sorry
 
 end OptimalControlChallenge

@@ -4,8 +4,9 @@
 
 Optimal control theory in Lean 4 with Mathlib: **the Pontryagin maximum principle** (free terminal
 time, integral cost, mixed boundary conditions, strong local minimizers), by the argument of
-Agrachev and Sachkov, and **Filippov's theorem** on the compactness of attainable sets, with the
-existence of optimal controls.
+Agrachev and Sachkov; **Filippov's theorem** on the compactness of attainable sets, with the
+existence of optimal controls; and **Noether's theorem for optimal control** (Sussmann): the
+momentum of a symmetry is constant along every extremal.
 
 Control systems have measurable controls and Carathéodory trajectories. Everything is proved: there
 is no `sorry`, no `axiom` and no `native_decide`.
@@ -22,11 +23,15 @@ is no `sorry`, no `axiom` and no `native_decide`.
 | [`ControlSystem.isCompact_reachableSet`](OptimalControl/ODE/ControlSystem.lean#L405), [`isCompact_reachableSetLE`](OptimalControl/ODE/ControlSystem.lean#L383) | Filippov's theorem: with `F` continuous, `U` compact, convex velocity sets and bounded velocities, the attainable sets at time `T` and up to time `T` are compact | Agrachev–Sachkov, Theorem 10.1 |
 | [`ControlSystem.exists_optimal_fixedTime`](OptimalControl/ODE/ControlSystem.lean#L514), [`exists_optimal_freeTime`](OptimalControl/ODE/ControlSystem.lean#L548) | optimal controls exist for integral costs whose extended velocity sets are convex, with fixed or free terminal time | Agrachev–Sachkov, Theorem 10.1, applied to the system extended by the cost |
 | [`ControlSystem.isCompact_constrainedEndpoints`](OptimalControl/ODE/StateConstraint.lean#L309), [`exists_optimal_constrained`](OptimalControl/ODE/StateConstraint.lean#L378) | the same two results with a closed state constraint, a compact set of initial points, a closed endpoint relation and a window of terminal times | extends Agrachev–Sachkov, Theorem 10.1 (same argument) |
+| [`Pontryagin.noether`](OptimalControl/Pontryagin/Noether.lean#L690), [`noether_momentumMap`](OptimalControl/Pontryagin/Noether.lean#L840) | Noether's theorem: along every pair `(q, p)` with the adjoint equation and the maximum condition (any multiplier), the momentum `p(Y(q))` of an infinitesimal symmetry `Y` is constant; for a Lie algebra of symmetries, the momentum map is constant | Sussmann, Theorem 4.1, under weaker hypotheses |
+| [`Pontryagin.sussmann_theorem4_1`](OptimalControl/Pontryagin/Noether.lean#L919), [`maximum_principle_noether`](OptimalControl/Pontryagin/Noether.lean#L943) | Theorem 4.1 as Sussmann states it, for biextremals; the maximum principle with a multiplier along which every such momentum is constant | Sussmann, Theorem 4.1 |
 | [`MeasureTheory.exists_measurable_forall_mem_ae_eq_zero`](OptimalControl/MeasureTheory/MeasurableSelection.lean#L261) | zeros of a Carathéodory function on a compact set can be chosen measurably | Kuratowski–Ryll-Nardzewski; Filippov's lemma |
 
 `E` (states), `V` (control values) and the parameter spaces of boundary conditions are
-finite-dimensional real normed spaces; in Filippov's theorem `V` need only be a metric space. The
-control set `U ⊆ V` is compact and the state constraint `Ω ⊆ E` is open.
+finite-dimensional real normed spaces; `V` need only be a metric space in Filippov's theorem, and
+any type with a σ-algebra in Noether's theorem. The state constraint `Ω ⊆ E` is open. The control
+set `U ⊆ V` is compact in the maximum principle and in Filippov's theorem; Noether's theorem
+allows any `U`.
 
 More documentation:
 
@@ -34,11 +39,14 @@ More documentation:
   Carathéodory theory beneath, measurable selection, the method of proof and every file.
 - [docs/AGRACHEV_SACHKOV.md](docs/AGRACHEV_SACHKOV.md): Agrachev and Sachkov's Chapter 12 result by
   result, the readings and departures D1–D11, and the gaps found in the source.
+- [docs/SUSSMANN.md](docs/SUSSMANN.md): Sussmann's Noether theorem result by result, the readings
+  S1–S8, the gaps found in the paper, and the hypotheses the proof does not use.
 
 ## Lean statement of record
 
 [`OptimalControlChallenge.lean`](OptimalControlChallenge.lean) imports only Mathlib and states,
-with `sorry`, the maximum principle, Filippov's theorem and the existence of optimal controls.
+with `sorry`, the maximum principle, Filippov's theorem, the existence of optimal controls and
+Noether's theorem (`noether`).
 
 [`OptimalControlSolution.lean`](OptimalControlSolution.lean) proves them from the library;
 Palomar's Comparator ([`comparator.json`](comparator.json)) checks that it proves exactly these
@@ -86,7 +94,7 @@ lake env lake comparator --config=comparator.json   # the Solution proves the Ch
 | Path | Content |
 | --- | --- |
 | [`OptimalControl/Defs.lean`](OptimalControl/Defs.lean) | the definitions that the statements of record use (shared with the Challenge) |
-| [`OptimalControl/Pontryagin/`](OptimalControl/Pontryagin) | the maximum principle: Lemmas 12.1–12.2, Theorems 12.1–12.5, the free-time form |
+| [`OptimalControl/Pontryagin/`](OptimalControl/Pontryagin) | the maximum principle: Lemmas 12.1–12.2, Theorems 12.1–12.5, the free-time form; Noether's theorem |
 | [`OptimalControl/ODE/`](OptimalControl/ODE) | Filippov's theorem (also with a state constraint), Carathéodory theory, needle variations, time changes |
 | [`OptimalControl/Convex/Cone/`](OptimalControl/Convex/Cone) | supporting hyperplanes and finite generation of cones; openness at the vertex of a cone |
 | [`OptimalControl/MeasureTheory/`](OptimalControl/MeasureTheory) | measurable selection, Lebesgue points |
@@ -106,6 +114,8 @@ separation) as axioms.
 No complete formal proof of the maximum principle was found. This package does not depend on that
 development; its proofs follow Agrachev and Sachkov.
 
+No formal proof of Noether's theorem for optimal control was found.
+
 ## References
 
 - A. A. Agrachev and Yu. L. Sachkov, *Control Theory from the Geometric Viewpoint*,
@@ -113,6 +123,9 @@ development; its proofs follow Agrachev and Sachkov.
   12). Page numbers in the docstrings are those of the authors' draft (preface September 2003),
   posted on A. A. Agrachev's home page
   (<https://people.sissa.it/~agrachev/agrachev_files/books.html>).
+- H. J. Sussmann, *Symmetries and integrals of motion in optimal control*, in *Geometry in
+  Nonlinear Control and Differential Inclusions*, Banach Center Publications 32, 1995,
+  pp. 379–393 (Theorem 4.1).
 - R. V. Gamkrelidze, *Principles of Optimal Control Theory*, Plenum, 1978.
 
 ## Credits

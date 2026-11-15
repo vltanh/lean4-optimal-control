@@ -32,7 +32,10 @@ Every statement is proved: no `sorry`, and no axiom beyond Lean's standard ones.
 An optimal control system `P = (M, U, f, f⁰)` is a family of vector fields `f_u` and functions
 (a Lagrangian) `f⁰_u` on `M`, indexed by a set `U`. Here `M` is an open subset `Ω` of a
 finite-dimensional real normed space `E`, `U ⊆ V` is any set of control values, `f : E → V → E`
-and `φ : E → V → ℝ` (`φ = f⁰`).
+and `φ : E → V → ℝ` (`φ = f⁰`). The definitions that `noether` uses (`IsIntegralCurveIn`,
+`flowDomain`, `flowMap`, `PermutesFamily`, `IsSymmetry`, `IsInfinitesimalSymmetry`, `momentum`)
+are in `OptimalControl/Defs.lean`, whose block of shared definitions the statement of record
+`OptimalControlChallenge.noether` copies; the others are here.
 
 * A **symmetry** (`IsSymmetry`, p. 389) is a diffeomorphism `σ : V₁ → V₂` of open subsets of `M`
   such that for every `u ∈ U` there are `u₁, u₂ ∈ U` with (i) `dσ(x) f_u(x) = f_{u₁}(σ(x))` and
@@ -56,7 +59,8 @@ and `φ : E → V → ℝ` (`φ = f⁰`).
 
 * `Pontryagin.noether` (one vector field): along every pair `(q, p)` with the adjoint equation and
   the maximum condition of the maximum principle (`IsAdjoint`, `IsMaximal`, any multiplier `ν`),
-  `t ↦ ⟨p(t), Y(q(t))⟩` is constant, for every infinitesimal symmetry `Y`.
+  `t ↦ ⟨p(t), Y(q(t))⟩` is constant, for every infinitesimal symmetry `Y`. This is the statement
+  of record `OptimalControlChallenge.noether`.
 * `Pontryagin.noether_momentumMap`: the momentum map `μ^τ(q(t), p(t))` is constant.
 * `Pontryagin.sussmann_theorem4_1`: Sussmann's Theorem 4.1 as he states it, for biextremals.
 * `Pontryagin.maximum_principle_noether`: the multiplier of `Pontryagin.maximum_principle` can be
@@ -110,10 +114,12 @@ and `φ : E → V → ℝ` (`φ = f⁰`).
 * S7 (admissibility). Sussmann's `P`-admissible controls (p. 388) are read as the package's
   admissible pairs (`IsAdmissibleIn`: measurable controls with values in `U`, Carathéodory
   trajectories in `Ω`) on `[0, T]` (the system is autonomous, so the interval `[a, b]` may start
-  at `0`). This reading restricts Sussmann's arbitrary set `U` to a subset of a
-  finite-dimensional space `V` and the controls `ũ` to Borel-measurable ones, a restriction that
-  the proof does not use (it uses only that `q` is a Carathéodory solution in `Ω` with
-  `ũ(t) ∈ U`). It drops his Lipschitz–Carathéodory condition on `F^η` (measurable in `t`,
+  at `0`). In `noether` and `sussmann_theorem4_1` the control values form any type `V` with a
+  σ-algebra; with the trivial σ-algebra `⊥` every control is measurable, so Sussmann's arbitrary
+  set `U` and arbitrary controls are covered (the proof uses only that `q` is a Carathéodory
+  solution in `Ω` with `ũ(t) ∈ U`). `maximum_principle_noether` keeps the setting of the maximum
+  principle (`V` finite-dimensional with its Borel σ-algebra, `U` compact). The reading drops
+  Sussmann's Lipschitz–Carathéodory condition on `F^η` (measurable in `t`,
   locally Lipschitz in `x`, with local integrable bounds), a generalization: the only uniqueness
   the proof uses is that of the integral curves of `Y`.
 * S8 (the Lie algebra). `L` is any real Lie algebra (not necessarily finite-dimensional, as in
@@ -228,28 +234,6 @@ private theorem isC1On_of_contDiffOn {W : Type*} [NormedAddCommGroup W] {Y : E �
 /-! ### Flows of vector fields on `Ω` -/
 
 section Flow
-
-/-- An integral curve of the vector field `Y` in `Ω` from `x` on the interval between `0` and `s`,
-in the Carathéodory form of `ControlSystem.IsSolution` for the autonomous system `y' = Y(y)`:
-`γ` is continuous on `[[0, s]]`, `r ↦ Y(γ(r))` is integrable there,
-`γ(r) = x + ∫₀ʳ Y(γ(ρ)) dρ` and `γ(r) ∈ Ω` for `r ∈ [[0, s]]`. For `Y` continuous on `Ω` these
-are the classical integral curves (`γ` is `C¹` with `γ' = Y ∘ γ`). -/
-def IsIntegralCurveIn (Y : E → E) (Ω : Set E) (x : E) (s : ℝ) (γ : ℝ → E) : Prop :=
-  ContinuousOn γ [[0, s]] ∧ IntervalIntegrable (fun r ↦ Y (γ r)) volume 0 s ∧
-    (∀ r ∈ [[0, s]], γ r = x + ∫ ρ in (0 : ℝ)..r, Y (γ ρ)) ∧ ∀ r ∈ [[0, s]], γ r ∈ Ω
-
-/-- The domain `D_s` of the time-`s` map `e^{sY}` of the flow of `Y` on `Ω` (Sussmann, p. 381:
-"the domain of `e^{tX}` ..., which need not be the whole manifold"): the points of `Ω` from which
-an integral curve of `Y` in `Ω` runs on the interval between `0` and `s` (S3). -/
-def flowDomain (Y : E → E) (Ω : Set E) (s : ℝ) : Set E :=
-  {x | ∃ γ, IsIntegralCurveIn Y Ω x s γ}
-
-open Classical in
-/-- The time-`s` map `e^{sY}` of the flow of `Y` on `Ω` (S3): the value at time `s` of an integral
-curve of `Y` in `Ω` from `x`, chosen among them (they agree for `Y` of class `C¹`,
-`flowMap_eq_of_isIntegralCurveIn`); `x` itself outside `flowDomain Y Ω s`. -/
-noncomputable def flowMap (Y : E → E) (Ω : Set E) (s : ℝ) (x : E) : E :=
-  if h : ∃ γ, IsIntegralCurveIn Y Ω x s γ then h.choose s else x
 
 variable {Y : E → E} {Ω : Set E}
 
@@ -484,40 +468,6 @@ end Flow
 
 section Symmetry
 
-/-- Conditions (i)–(ii) of Sussmann's definition of a symmetry (p. 389), for a map `σ` on `V₁`:
-for every `u ∈ U` there is `u₁ ∈ U` with `dσ(x) f_u(x) = f_{u₁}(σ(x))` and
-`f⁰_{u₁}(σ(x)) = f⁰_u(x)` on `V₁` (`σ` maps `(f_u, f⁰_u)` to `(f_{u₁}, f⁰_{u₁})`), and there is
-`u₂ ∈ U` with `dσ(x) f_{u₂}(x) = f_u(σ(x))` and `f⁰_u(σ(x)) = f⁰_{u₂}(x)` on `V₁` (`σ⁻¹` maps
-`(f_u, f⁰_u)` to `(f_{u₂}, f⁰_{u₂})`). The controls may be permuted; the cost is invariant. -/
-def PermutesFamily (f : E → V → E) (φ : E → V → ℝ) (U : Set V) (σ : E → E) (V₁ : Set E) :
-    Prop :=
-  (∀ u ∈ U, ∃ u₁ ∈ U, ∀ x ∈ V₁, fderiv ℝ σ x (f x u) = f (σ x) u₁ ∧ φ (σ x) u₁ = φ x u) ∧
-    ∀ u ∈ U, ∃ u₂ ∈ U, ∀ x ∈ V₁, fderiv ℝ σ x (f x u₂) = f (σ x) u ∧ φ (σ x) u = φ x u₂
-
-/-- **A symmetry of the optimal control system `(Ω, U, f, φ)`** (Sussmann, p. 389): a
-diffeomorphism `σ : V₁ → V₂` between open subsets of `Ω`, here of class `C¹` (S2: `σ` maps `V₁`
-bijectively onto `V₂`, is `C¹` on `V₁`, and its inverse is `C¹` on `V₂`), satisfying (i)–(ii)
-(`PermutesFamily`). -/
-structure IsSymmetry (f : E → V → E) (φ : E → V → ℝ) (Ω : Set E) (U : Set V) (σ : E → E)
-    (V₁ V₂ : Set E) : Prop where
-  isOpen_left : IsOpen V₁
-  isOpen_right : IsOpen V₂
-  left_subset : V₁ ⊆ Ω
-  right_subset : V₂ ⊆ Ω
-  bijOn : BijOn σ V₁ V₂
-  contDiffOn : ContDiffOn ℝ 1 σ V₁
-  contDiffOn_invFunOn : ContDiffOn ℝ 1 (Function.invFunOn σ V₁) V₂
-  permutesFamily : PermutesFamily f φ U σ V₁
-
-/-- **An infinitesimal symmetry** of `(Ω, U, f, φ)`: a vector field `Y` on `Ω`, here of class `C¹`
-(Sussmann: smooth; S2), every time-`s` map `e^{sY} : D_s → D_{-s}` of which, `s ∈ ℝ`, is a
-symmetry (Sussmann, p. 389: "every diffeomorphism `e^{tτ(X)}` is a symmetry of `P`"). -/
-structure IsInfinitesimalSymmetry (f : E → V → E) (φ : E → V → ℝ) (Ω : Set E) (U : Set V)
-    (Y : E → E) : Prop where
-  contDiffOn : ContDiffOn ℝ 1 Y Ω
-  isSymmetry : ∀ s : ℝ,
-    IsSymmetry f φ Ω U (flowMap Y Ω s) (flowDomain Y Ω s) (flowDomain Y Ω (-s))
-
 variable {f : E → V → E} {φ : E → V → ℝ} {Ω : Set E} {U : Set V} {σ : E → E} {V₁ V₂ : Set E}
 
 /-- An explicit flow `Φ` of `Y` that preserves `Ω` gives integral curves: `r ↦ Φ r x`, `x ∈ Ω`,
@@ -697,11 +647,6 @@ end Symmetry
 /-! ### Momentum and the Noether theorem -/
 
 section Noether
-
-/-- The momentum of a vector field `Y`, `h_Y(x, p) = ⟨p, Y(x)⟩` on `T*Ω = Ω × E*` (Sussmann,
-p. 384: "every vector field `X` gives rise to a smooth function `h_X` on `T*M`"). -/
-def momentum (Y : E → E) (x : E) (p : StrongDual ℝ E) : ℝ :=
-  p (Y x)
 
 variable {f : E → V → E} {φ : E → V → ℝ} {Ω : Set E} {U : Set V}
 

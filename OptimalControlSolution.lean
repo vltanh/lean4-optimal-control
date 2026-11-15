@@ -7,8 +7,9 @@ public import OptimalControl
 
 Restates the theorems of `OptimalControlChallenge.lean` word for word and proves them from the
 library: `Pontryagin.maximum_principle`, Filippov's theorem (`ControlSystem.isCompact_reachableSet`,
-`ControlSystem.isCompact_reachableSetLE`) and the existence of optimal controls
-(`ControlSystem.exists_optimal_fixedTime`, `ControlSystem.exists_optimal_freeTime`). The library
+`ControlSystem.isCompact_reachableSetLE`), the existence of optimal controls
+(`ControlSystem.exists_optimal_fixedTime`, `ControlSystem.exists_optimal_freeTime`) and Noether's
+theorem (`Pontryagin.noether`). The library
 states the last four with a Borel σ-algebra on `E`, and Filippov's theorem with a bound `M ≥ 0`;
 the proofs below supply the σ-algebra, and an empty attainable set when `M < 0`. Palomar's
 Comparator checks that these are the Challenge's statements and that their proofs use only the
@@ -123,6 +124,21 @@ theorem exists_optimal_freeTime {E V : Type*} [NormedAddCommGroup E] [NormedSpac
   have _ : BorelSpace E := ⟨rfl⟩
   have _ : CompleteSpace E := FiniteDimensional.complete ℝ E
   exact ControlSystem.exists_optimal_freeTime hF hU hφ hconv hFM h₁
+
+/-- **Noether's theorem for optimal control** (Sussmann, Theorem 4.1, for one vector field): if
+`Y` is an infinitesimal symmetry of the optimal control system `(Ω, U, f, φ)` of class `C¹`, then
+along every admissible pair `(ũ, q)` with a covector curve `p` that satisfies the adjoint equation
+and the maximum condition for some multiplier `ν`, the momentum `p(t)(Y(q(t)))` is constant on
+`[0, T]`. -/
+theorem noether {E V : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+    [MeasurableSpace V] {Ω : Set E} (hΩ : IsOpen Ω) {U : Set V} {f : E → V → E}
+    {φ : E → V → ℝ} (hf : ∀ u ∈ U, ContDiffOn ℝ 1 (f · u) Ω)
+    (hφ : ∀ u ∈ U, ContDiffOn ℝ 1 (φ · u) Ω) {Y : E → E}
+    (hY : IsInfinitesimalSymmetry f φ Ω U Y) {T ν : ℝ} {ũ : ℝ → V} {q : ℝ → E}
+    {p : ℝ → StrongDual ℝ E} (href : IsAdmissibleIn f Ω U (q 0) T ũ q)
+    (hadj : IsAdjoint f φ ν ũ q T p) (hmax : IsMaximal f φ ν U ũ q T p) :
+    ∀ t ∈ Icc 0 T, momentum Y (q t) (p t) = momentum Y (q 0) (p 0) :=
+  Pontryagin.noether hΩ hf hφ hY href hadj hmax
 
 end OptimalControlChallenge
 

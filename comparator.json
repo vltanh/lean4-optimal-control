@@ -6,7 +6,8 @@
     "OptimalControlChallenge.isCompact_reachableSet",
     "OptimalControlChallenge.isCompact_reachableSetLE",
     "OptimalControlChallenge.exists_optimal_fixedTime",
-    "OptimalControlChallenge.exists_optimal_freeTime"
+    "OptimalControlChallenge.exists_optimal_freeTime",
+    "OptimalControlChallenge.noether"
   ],
   "definition_names": [],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
