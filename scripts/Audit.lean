@@ -23,6 +23,7 @@ import all OptimalControl.Pontryagin.FreeTime
 import all OptimalControl.Pontryagin.Geometric
 import all OptimalControl.Pontryagin.IntegralCost
 import all OptimalControl.Pontryagin.MaximumPrinciple
+import all OptimalControl.Pontryagin.Noether
 
 /-!
 # Axiom audit
@@ -54,6 +55,17 @@ meta def mainResults : List Name :=
    ``Pontryagin.lemma12_2_local,
    ``Pontryagin.exists_costate_of_boundary,
    ``HasFDerivWithinAt.zero_mem_interior_image_inter_cone,
+   -- Noether's theorem for optimal control (Sussmann, Theorem 4.1)
+   ``Pontryagin.noether,
+   ``Pontryagin.noether_momentumMap,
+   ``Pontryagin.sussmann_theorem4_1,
+   ``Pontryagin.maximum_principle_noether,
+   ``Pontryagin.IsSymmetry.controlHamiltonian_cotangentLift,
+   ``Pontryagin.IsInfinitesimalSymmetry.bracket_eq_zero,
+   ``Pontryagin.flowMap_eq_of_isIntegralCurveIn,
+   ``Pontryagin.hasDerivAt_fderiv_flowMap_zero,
+   ``Pontryagin.isInfinitesimalSymmetry_of_flow,
+   ``Pontryagin.noether_rotation,
    -- Filippov's theorem and the existence of optimal controls
    ``ControlSystem.isCompact_reachableSet,
    ``ControlSystem.isCompact_reachableSetLE,
