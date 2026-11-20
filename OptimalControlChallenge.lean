@@ -123,6 +123,12 @@ infinitesimal symmetries, follows by applying it to each field of the action.
 
 -- BEGIN SHARED DEFINITIONS
 
+-- Palomar compiles the Challenge with plain `lean`, without the `[leanOptions]` of
+-- `lakefile.toml`, so an option that changes elaboration is set here, in the copied block: the
+-- block then elaborates to the same terms in the Challenge and in the library. (Without it,
+-- `Pontryagin.IsAdjoint` finds `NormedSpace ℝ ℝ` by another path, and Comparator rejects it.)
+set_option maxSynthPendingDepth 3
+
 open MeasureTheory Set Filter Topology
 
 namespace ControlSystem
